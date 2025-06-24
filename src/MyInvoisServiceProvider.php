@@ -2,6 +2,7 @@
 
 namespace Laraditz\MyInvois;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class MyInvoisServiceProvider extends ServiceProvider
@@ -16,12 +17,12 @@ class MyInvoisServiceProvider extends ServiceProvider
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'my-invois');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'my-invois');
-        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('my-invois.php'),
+                __DIR__ . '/../config/config.php' => config_path('myinvois.php'),
             ], 'config');
 
             // Publishing the views.
@@ -50,11 +51,31 @@ class MyInvoisServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'my-invois');
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'myinvois');
 
         // Register the main class to use with the facade
-        $this->app->singleton('my-invois', function () {
-            return new MyInvois;
+        $this->app->singleton('myinvois', function () {
+            return new MyInvois(
+                client_id: config('myinvois.client_id'),
+                client_secret: config('myinvois.client_secret')
+            );
         });
+    }
+
+    protected function registerRoutes()
+    {
+        Route::group($this->routeConfiguration(), function () {
+            Route::name('tiktok.')->group(function () {
+                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            });
+        });
+    }
+
+    protected function routeConfiguration()
+    {
+        return [
+            'prefix' => config('myionvois.routes.prefix'),
+            'middleware' => config('myionvois.middleware'),
+        ];
     }
 }

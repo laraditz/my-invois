@@ -1,13 +1,13 @@
 <?php
 
-namespace Laraditz\MyInvois;
+namespace Laraditz\MyInvois\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \Laraditz\MyInvois\Skeleton\SkeletonClass
  */
-class MyInvoisFacade extends Facade
+class MyInvois extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -16,6 +16,6 @@ class MyInvoisFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'my-invois';
+        return 'myinvois';
     }
 }
