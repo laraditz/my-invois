@@ -5,10 +5,12 @@ namespace Laraditz\MyInvois;
 use LogicException;
 use BadMethodCallException;
 use Illuminate\Support\Str;
+use Laraditz\MyInvois\Models\MyinvoisAccessToken;
+use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
 
 class MyInvois
 {
-    private $services = ['auth'];
+    private $services = ['auth', 'document_type'];
 
     public function __construct(
         private string $client_id,
@@ -67,5 +69,34 @@ class MyInvois
     public function config(string $name): array|string|int|bool
     {
         return config('myinvois.' . $name);
+    }
+
+    public function getAccessToken(): ?string
+    {
+        $accessTokenModel = MyinvoisAccessToken::query()
+            ->where('client_id', $this->getClientId())
+            ->hasNotExpired()
+            ->first();
+
+
+
+        if ($accessTokenModel) {
+            return $accessTokenModel->access_token;
+        } else {
+            $myinvois = MyInvois::auth()->token(
+                client_id: $this->getClientId(),
+                client_secret: $this->getClientSecret(),
+                grant_type: 'client_credentials',
+                scope: 'InvoicingAPI'
+            );
+
+            $accessToken = data_get($myinvois, 'access_token');
+
+            if (!$accessToken) {
+                throw new MyInvoisApiError($result ?? ['code' => __('Missing an access token')]);
+            }
+
+            return $accessToken;
+        }
     }
 }

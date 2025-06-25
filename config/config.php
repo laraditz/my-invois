@@ -17,5 +17,9 @@ return [
         'auth' => [
             'token' => 'POST /connect/token',
         ],
+        'document_type' => [
+            'all' => '/api/v1.0/documenttypes',
+            'get' => '/api/v1.0/documenttypes/{id}',
+        ],
     ]
 ];

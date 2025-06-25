@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Laraditz\MyInvois\Models\MyinvoisRequest;
-use Laraditz\MyInvois\Exceptions\MyInvoisAPIError;
+use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
+use Laraditz\MyInvois\Services\AuthService;
 
 class BaseService
 {
@@ -30,7 +31,12 @@ class BaseService
         private ?array $payload = [], // for body payload
         private null|array|string|int $params = null, // for path variables
     ) {
-        $this->client = Http::asForm();
+
+        if ($this instanceof AuthService) {
+            $this->client = Http::asForm();
+        } else {
+            $this->client = Http::withHeaders($this->getHeaders());
+        }
     }
 
     public function __call($methodName, $arguments)
@@ -45,6 +51,7 @@ class BaseService
         if (method_exists($this, $methodName)) {
             return $this->$methodName($arguments);
         }
+
 
         if (in_array(Str::snake($methodName), $this->getAllowedMethods())) {
 
@@ -72,14 +79,14 @@ class BaseService
         $url = $this->getUrl();
         $queryString = $this->getQueryString();
 
-        // dd($queryString);
-
         if ($queryString && count($queryString) > 0) {
             $url = $url . '?' . http_build_query($queryString);
         }
 
         $payload = $this->getPayload();
         $savePayload = $this->sanitizePayload($payload);
+
+        // dd($url, $savePayload);
 
         $request = MyinvoisRequest::create([
             'action' => $this->serviceName . '::' . $this->methodName,
@@ -91,12 +98,16 @@ class BaseService
             ? $this->client->$method($url, $payload)
             : $this->client->$method($url);
 
+        // dd($response->headers(), $response->json());
+
         $response->throw(function (Response $response, RequestException $e) use ($request) {
             $result = $response->json();
+            $headers = $response->headers();
             $error = data_get($result, 'error');
             $errorCode = data_get($result, 'error.errorCode') ?? null;
             $errorMessage = null;
             $errorDescription = null;
+            $correlationId = data_get($headers, 'correlationId.0');
 
             if ($errorCode) {
                 $errorMessage = data_get($result, 'error.error');
@@ -107,6 +118,7 @@ class BaseService
 
             $request->update([
                 'http_code' => $response->getStatusCode() ?? $response->status(),
+                'correlation_id' => $correlationId,
                 'error_code' => $errorCode,
                 'error_message' => $errorMessage,
                 'error_description' => $errorDescription,
@@ -117,11 +129,13 @@ class BaseService
         // dd($response->body());
 
         $result = $response->json();
+        $headers = $response->headers();
 
         if ($response->successful()) {
 
             $request->update([
                 'http_code' => $response->getStatusCode() ?? $response->status(),
+                'correlation_id' => data_get($headers, 'correlationId.0'),
                 'response' => $result,
             ]);
 
@@ -130,21 +144,33 @@ class BaseService
             return $result;
         }
 
-        throw new MyInvoisAPIError($result ?? ['code' => __('Error')]);
+        throw new MyInvoisApiError($result ?? ['code' => __('Error')]);
     }
 
     public function getHeaders(): array
     {
         $headers = [
-            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Accept-Language' => 'en',
         ];
+
+        if ($this instanceof AuthService) {
+            // no need access token for this service
+        } else {
+            $accessToken = $this->myInvois->getAccessToken();
+
+            if ($accessToken) {
+                $headers['Authorization'] = 'Bearer ' . $accessToken;
+            }
+        }
 
         return $headers;
     }
 
     private function setRouteFromConfig(string $fqcn, string $method): void
     {
-        $route_prefix = str($fqcn)->afterLast('\\')->remove('Service')->lower()->value;
+        $route_prefix = str($fqcn)->afterLast('\\')->remove('Service')->snake()->lower()->value;
         $route_name = str($method)->snake()->value;
         $route_path = '';
         $params = $this->getParams();
@@ -191,7 +217,7 @@ class BaseService
 
     protected function getAllowedMethods(): array
     {
-        $route_prefix = str($this->serviceName)->remove('Service')->lower()->value;
+        $route_prefix = str($this->serviceName)->remove('Service')->snake()->lower()->value;
 
         return array_keys(config('myinvois.routes.' . $route_prefix) ?? []);
     }
@@ -300,6 +326,13 @@ class BaseService
     protected function getQueryString(): array
     {
         return $this->queryString;
+    }
+
+    public function params(null|array|string|int $params): self
+    {
+        $this->setParams($params);
+
+        return $this;
     }
 
     protected function setParams(null|array|string|int $params): void

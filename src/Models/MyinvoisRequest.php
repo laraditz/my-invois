@@ -9,7 +9,18 @@ class MyinvoisRequest extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['action', 'url', 'payload', 'http_code', 'response', 'error', 'error_code', 'error_message', 'error_description'];
+    protected $fillable = [
+        'action',
+        'url',
+        'payload',
+        'http_code',
+        'response',
+        'correlation_id',
+        'error',
+        'error_code',
+        'error_message',
+        'error_description'
+    ];
 
     protected function casts(): array
     {

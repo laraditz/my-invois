@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->json('payload')->nullable();
             $table->unsignedSmallInteger('http_code')->nullable();
             $table->json('response')->nullable();
+            $table->string('correlation_id')->nullable();
             $table->string('error')->nullable();
             $table->string('error_code')->nullable();
             $table->string('error_message')->nullable();
