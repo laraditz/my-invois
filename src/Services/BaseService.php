@@ -132,16 +132,26 @@ class BaseService
         $headers = $response->headers();
 
         if ($response->successful()) {
+            $http_code = $response->getStatusCode() ?? $response->status();
+            $correlationId = data_get($headers, 'correlationId.0');
 
             $request->update([
-                'http_code' => $response->getStatusCode() ?? $response->status(),
-                'correlation_id' => data_get($headers, 'correlationId.0'),
+                'http_code' => $http_code,
+                'correlation_id' => $correlationId,
                 'response' => $result,
             ]);
 
             $this->afterRequest(request: $request, result: $result);
 
-            return $result;
+            $return = [
+                'success' => $http_code >= 200 && $http_code < 300 ? true : false,
+            ];
+
+            if ($result) {
+                $return['data'] = $result;
+            }
+
+            return $return;
         }
 
         throw new MyInvoisApiError($result ?? ['code' => __('Error')]);
@@ -236,7 +246,7 @@ class BaseService
         }
     }
 
-    private function afterRequest(MyinvoisRequest $request, array $result = []): void
+    private function afterRequest(MyinvoisRequest $request, ?array $result = []): void
     {
         $methodName = 'after' . Str::studly($this->methodName) . 'Request';
 

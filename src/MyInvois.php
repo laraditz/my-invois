@@ -10,7 +10,7 @@ use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
 
 class MyInvois
 {
-    private $services = ['auth', 'document_type'];
+    private $services = ['auth', 'document_type', 'taxpayer'];
 
     public function __construct(
         private string $client_id,
