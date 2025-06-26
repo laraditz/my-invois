@@ -5,12 +5,14 @@ namespace Laraditz\MyInvois;
 use LogicException;
 use BadMethodCallException;
 use Illuminate\Support\Str;
+use Laraditz\MyInvois\Enums\XMLNS;
+use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Models\MyinvoisAccessToken;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
 
 class MyInvois
 {
-    private $services = ['auth', 'document_type', 'taxpayer', 'notification'];
+    private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
 
     public function __construct(
         private string $client_id,
@@ -98,5 +100,31 @@ class MyInvois
 
             return $accessToken;
         }
+    }
+
+    public function generateDocument($data, Format $format)
+    {
+        return match ($format) {
+            Format::XML => $this->generateXMLDocument($data),
+            Format::JSON => $this->generateJSONDocument($data),
+        };
+    }
+
+    public function generateXMLDocument($data)
+    {
+        $service = new \Sabre\Xml\Service();
+
+        $service->namespaceMap = [
+            'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2' => '',
+            XMLNS::CBC->getNamespace() => XMLNS::CBC(),
+            XMLNS::CAC->getNamespace() => XMLNS::CAC()
+        ];
+
+        return $service->write('Invoice', $data->toXmlArray());
+    }
+
+    public function generateJSONDocument($data)
+    {
+
     }
 }
