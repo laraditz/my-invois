@@ -4,19 +4,18 @@ namespace Laraditz\MyInvois\Data;
 
 use Laraditz\MyInvois\Enums\XMLNS;
 
-class TaxTotal extends AbstractData
+class ItemPriceExtension extends AbstractData
 {
     public function __construct(
-        public Data|Money $TaxAmount,
-        public TaxSubtotal $TaxSubtotal,
+        public Data|Money $Amount,
+
     ) {
     }
 
     public function ns(string $name): ?XMLNS
     {
         return match ($name) {
-            'TaxSubtotal' => XMLNS::CAC,
-            'TaxAmount' => XMLNS::CBC,
+            'Amount' => XMLNS::CBC,
             default => null
         };
     }

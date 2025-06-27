@@ -27,7 +27,7 @@ class PrepaidPayment extends AbstractData
     {
         return match ($name) {
             'PaidDate' => $this->$name instanceof Carbon ? $this->$name?->toDateString() : $this->$name,
-            'PaidTime' => $this->$name instanceof Carbon ? $this->$name?->toTimeString() : $this->$name,
+            'PaidTime' => $this->$name instanceof Carbon ? $this->$name?->format('H:i:s\Z') : $this->$name,
             default => $this->$name
         };
     }

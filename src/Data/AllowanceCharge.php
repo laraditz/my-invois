@@ -9,14 +9,15 @@ class AllowanceCharge extends AbstractData
     public function __construct(
         public bool $ChargeIndicator,
         public string $AllowanceChargeReason,
-        public Data|Money $Amount,
+        public ?string $MultiplierFactorNumeric = null,
+        public Data|Money|null $Amount = null,
     ) {
     }
 
     public function ns(string $name): ?XMLNS
     {
         return match ($name) {
-            'ChargeIndicator', 'AllowanceChargeReason', 'Amount' => XMLNS::CBC,
+            'ChargeIndicator', 'AllowanceChargeReason', 'MultiplierFactorNumeric', 'Amount' => XMLNS::CBC,
             default => null
         };
     }

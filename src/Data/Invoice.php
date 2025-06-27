@@ -9,8 +9,8 @@ class Invoice extends AbstractData
 {
     public function __construct(
         public string $ID,
-        public Carbon $IssueDate,
-        public Carbon $IssueTime,
+        public Carbon|string $IssueDate,
+        public Carbon|string $IssueTime,
         public Data $InvoiceTypeCode,
         public string $DocumentCurrencyCode,
         public string $TaxCurrencyCode,
@@ -35,8 +35,8 @@ class Invoice extends AbstractData
     public function getValue(string $name): mixed
     {
         return match ($name) {
-            'IssueDate' => $this->$name?->toDateString(),
-            'IssueTime' => $this->$name?->toTimeString(),
+            'IssueDate' => $this->$name instanceof Carbon ? $this->$name?->toDateString() : $this->$name,
+            'IssueTime' => $this->$name instanceof Carbon ? $this->$name?->format('H:i:s\Z') : $this->$name,
             default => $this->$name
         };
     }
@@ -47,7 +47,7 @@ class Invoice extends AbstractData
             'ID', 'IssueDate', 'IssueTime', 'InvoiceTypeCode', 'DocumentCurrencyCode', 'TaxCurrencyCode' => XMLNS::CBC,
             'InvoicePeriod', 'BillingReference', 'AdditionalDocumentReference', 'AccountingSupplierParty',
             'AccountingCustomerParty', 'Delivery', 'PaymentMeans', 'PaymentTerms', 'PrepaidPayment',
-            'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal' => XMLNS::CAC,
+            'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal', 'InvoiceLine' => XMLNS::CAC,
             default => null
         };
     }
