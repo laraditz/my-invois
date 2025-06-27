@@ -116,8 +116,8 @@ class MyInvois
 
         $service->namespaceMap = [
             'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2' => '',
+            XMLNS::CAC->getNamespace() => XMLNS::CAC(),
             XMLNS::CBC->getNamespace() => XMLNS::CBC(),
-            XMLNS::CAC->getNamespace() => XMLNS::CAC()
         ];
 
         return $service->write('Invoice', $data->toXmlArray());
