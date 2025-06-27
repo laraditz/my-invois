@@ -11,7 +11,7 @@ class Invoice extends AbstractData
         public string $ID,
         public Carbon $IssueDate,
         public Carbon $IssueTime,
-        public array $InvoiceTypeCode,
+        public Data $InvoiceTypeCode,
         public string $DocumentCurrencyCode,
         public string $TaxCurrencyCode,
         public ?DatePeriod $InvoicePeriod = null,
@@ -19,13 +19,13 @@ class Invoice extends AbstractData
         public ?array $AdditionalDocumentReference = [],
         public ?AccountingSupplierParty $AccountingSupplierParty = null,
         public ?AccountingCustomerParty $AccountingCustomerParty = null,
-        public ?array $Delivery = [],
-        public ?array $PaymentMeans = [],
-        public ?array $PaymentTerms = [],
-        public ?array $PrepaidPayment = [],
+        public ?Delivery $Delivery = null,
+        public ?PaymentMeans $PaymentMeans = null,
+        public ?PaymentTerms $PaymentTerms = null,
+        public ?PrepaidPayment $PrepaidPayment = null,
         public ?array $AllowanceCharge = [],
-        public ?array $TaxTotal = [],
-        public ?array $LegalMonetaryTotal = [],
+        public ?TaxTotal $TaxTotal = null,
+        public ?LegalMonetaryTotal $LegalMonetaryTotal = null,
         public ?array $InvoiceLine = [],
         public ?array $UBLExtensions = [],
         public ?array $Signature = [],
@@ -45,7 +45,9 @@ class Invoice extends AbstractData
     {
         return match ($name) {
             'ID', 'IssueDate', 'IssueTime', 'InvoiceTypeCode', 'DocumentCurrencyCode', 'TaxCurrencyCode' => XMLNS::CBC,
-            'InvoicePeriod', 'BillingReference', 'AdditionalDocumentReference', 'AccountingSupplierParty', 'AccountingCustomerParty' => XMLNS::CAC,
+            'InvoicePeriod', 'BillingReference', 'AdditionalDocumentReference', 'AccountingSupplierParty',
+            'AccountingCustomerParty', 'Delivery', 'PaymentMeans', 'PaymentTerms', 'PrepaidPayment',
+            'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal' => XMLNS::CAC,
             default => null
         };
     }

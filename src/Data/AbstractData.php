@@ -80,13 +80,22 @@ abstract class AbstractData implements WithNamespace, WithValue
                     is_object($value)
                     && Str::of(get_class($value))->startsWith('Laraditz\\MyInvois\\Data')
                 ) {
-                    if (property_exists($value, 'value')) {
+                    if ($value instanceof Money) {
+                        $subdata = [
+                            'name' => $name,
+                            'value' => $value->value,
+                            'attributes' => ['currencyID' => $value->currencyID],
+                        ];
+
+                        $body[] = $subdata;
+
+                    } elseif (property_exists($value, 'value')) {
                         $subdata = [
                             'name' => $name,
                             'value' => $value->value,
                         ];
 
-                        if ($value->attributes) {
+                        if (property_exists($value, 'attributes')) {
                             $subdata['attributes'] = $value->attributes;
                         }
 
@@ -99,6 +108,11 @@ abstract class AbstractData implements WithNamespace, WithValue
                     $body += [
                         $name => $value
                     ];
+                } elseif (is_bool($value)) {
+                    $body += [
+                        $name => $value === true ? 'true' : 'false'
+                    ];
+
                 } elseif (is_array($value)) {
                     if (data_get($value, 'value')) {
                         $data['name'] = $name;
@@ -123,13 +137,21 @@ abstract class AbstractData implements WithNamespace, WithValue
                                 is_object($val)
                                 && Str::of(get_class($val))->startsWith('Laraditz\\MyInvois\\Data')
                             ) {
-                                if (property_exists($val, 'value')) {
+                                if ($val instanceof Money) {
+                                    $subdata = [
+                                        'name' => $name,
+                                        'value' => $val->value,
+                                        'attributes' => ['currencyID' => $val->currencyID],
+                                    ];
+
+                                    $body[] = $subdata;
+                                } elseif (property_exists($val, 'value')) {
                                     $subdata = [
                                         'name' => $name,
                                         'value' => $val->value,
                                     ];
 
-                                    if ($val->attributes) {
+                                    if (property_exists($val, 'attributes')) {
                                         $subdata['attributes'] = $val->attributes;
                                     }
 
