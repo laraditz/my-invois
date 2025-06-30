@@ -18,7 +18,6 @@ class SignedInfo extends AbstractData
     {
         return match ($name) {
             'CanonicalizationMethod', 'SignatureMethod', 'Reference' => XMLNS::DS,
-            default => null
         };
     }
 }

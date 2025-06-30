@@ -11,7 +11,7 @@ class Reference extends AbstractData implements WithAttributes
     use HasAttributes;
 
     public function __construct(
-        public ?array $Transforms = null,
+        public ?Transforms $Transforms = null,
         public ?Data $DigestMethod = null,
         public ?string $DigestValue = null,
     ) {
@@ -21,7 +21,6 @@ class Reference extends AbstractData implements WithAttributes
     {
         return match ($name) {
             'Transforms', 'DigestMethod', 'DigestValue' => XMLNS::DS,
-            default => null
         };
     }
 

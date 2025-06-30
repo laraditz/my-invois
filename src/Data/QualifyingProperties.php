@@ -2,12 +2,16 @@
 
 namespace Laraditz\MyInvois\Data;
 
+use Laraditz\MyInvois\Contracts\WithAttributes;
 use Laraditz\MyInvois\Enums\XMLNS;
 use Laraditz\MyInvois\Attributes\Attributes;
+use Laraditz\MyInvois\Traits\HasAttributes;
 
-#[Attributes(attrs: ['xmlns:' . XMLNS::XADES->value => 'http://uri.etsi.org/01903/v1.3.2#', 'Target' => 'signature'])]
-class QualifyingProperties extends AbstractData
+#[Attributes(attrs: ['Target' => 'signature'])]
+class QualifyingProperties extends AbstractData implements WithAttributes
 {
+    use HasAttributes;
+
     public function __construct(
         public SignedProperties $SignedProperties
     ) {
@@ -18,5 +22,12 @@ class QualifyingProperties extends AbstractData
         return match ($name) {
             'SignedProperties' => XMLNS::XADES,
         };
+    }
+
+    public function getAttributes(): array
+    {
+        return [
+            'xmlns:' . XMLNS::XADES() => XMLNS::XADES->getNamespace()
+        ];
     }
 }

@@ -4,19 +4,17 @@ namespace Laraditz\MyInvois\Data;
 
 use Laraditz\MyInvois\Enums\XMLNS;
 
-class Cert extends AbstractData
+class Transforms extends AbstractData
 {
     public function __construct(
-        public CertDigest $CertDigest,
-        public IssuerSerial $IssuerSerial
+        public array $Transform,
     ) {
     }
 
     public function ns(string $name): ?XMLNS
     {
         return match ($name) {
-            'CertDigest', 'IssuerSerial' => XMLNS::XADES,
-            default => null
+            'Transform' => XMLNS::DS,
         };
     }
 }

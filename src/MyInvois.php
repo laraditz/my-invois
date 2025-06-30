@@ -15,9 +15,11 @@ use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Data\X509Data;
 use Laraditz\MyInvois\Data\Reference;
 use Laraditz\MyInvois\Data\Signature;
+use Laraditz\MyInvois\Data\Transform;
 use Laraditz\MyInvois\Data\CertDigest;
 use Laraditz\MyInvois\Data\DataObject;
 use Laraditz\MyInvois\Data\SignedInfo;
+use Laraditz\MyInvois\Data\Transforms;
 use Laraditz\MyInvois\Data\IssuerSerial;
 use Laraditz\MyInvois\Data\UBLExtension;
 use Laraditz\MyInvois\Data\UBLExtensions;
@@ -41,67 +43,12 @@ class MyInvois
     ) {
     }
 
-    public function __call($method, $arguments)
-    {
-        throw_if(!$this->getClientId(), LogicException::class, __('Missing Client ID.'));
-        throw_if(!$this->getClientSecret(), LogicException::class, __('Missing Client Secret.'));
-
-        if (count($arguments) > 0) {
-            $argumentCollection = collect($arguments);
-
-            try {
-                $argumentCollection->keys()->ensure('string');
-            } catch (\Throwable $th) {
-                // throw $th;
-                throw new LogicException(__('Please pass a named arguments in :method method.', ['method' => $method]));
-            }
-        }
-
-        $property_name = Str::of($method)->snake()->lower()->value;
-
-        if (in_array($property_name, $this->services)) {
-            $reformat_property_name = ucfirst(Str::camel($method));
-
-            $service_name = 'Laraditz\\MyInvois\\Services\\' . $reformat_property_name . 'Service';
-
-            return new $service_name(app('myinvois'));
-        } else {
-            throw new BadMethodCallException(sprintf(
-                'Method %s::%s does not exist.',
-                get_class(),
-                $method
-            ));
-        }
-    }
-
-    public function getClientId(): string
-    {
-        return $this->client_id;
-    }
-
-    public function getClientSecret(): string
-    {
-        return $this->client_secret;
-    }
-
-    public function isSandbox(): bool
-    {
-        return $this->config('sandbox.mode');
-    }
-
-    public function config(string $name): array|string|int|bool
-    {
-        return config('myinvois.' . $name);
-    }
-
     public function getAccessToken(): ?string
     {
         $accessTokenModel = MyinvoisAccessToken::query()
             ->where('client_id', $this->getClientId())
             ->hasNotExpired()
             ->first();
-
-
 
         if ($accessTokenModel) {
             return $accessTokenModel->access_token;
@@ -143,78 +90,24 @@ class MyInvois
         ];
 
         $signature = $this->loadSignature($data);
-        // dd($signature);
 
         // add signature to document
         $data->add('UBLExtensions', $signature);
 
+        $content = $this->writeXml($service, 'Invoice', $data->toXmlArray());
+        // $this->displayXml($content);
 
-        $documentXml = $service->write('Invoice', $data->toXmlArray());
-        // dd('test');
-
-        $dom = $this->createDOM();
-        $dom->loadXML($documentXml);
-
-        header("Content-type: text/xml");
-        echo $dom->saveXML();
-        exit;
-
-
-
-
-        // $document = preg_replace('/<\?xml[^>]*>([\s\S]*?)/m', '', $dom->saveXML());
-
-        // header("Content-type: text/xml");
-        // echo $document;
-        // exit;
-
-        $parentPath = "//ns:Invoice";
-
-        $xpath = new \DomXPath($dom);
-        $xpath->registerNameSpace('ns', $ns);
-        // $xpath->registerNameSpace(XMLNS::CBC(), XMLNS::CBC->getNamespace());
-        $parent = $xpath->query($parentPath);
-
-        $firstSibling = $parent->item(0)->firstChild;
-        // dd($firstSibling);
-        // $firstSiblingDom = $this->createDOM();
-        // $firstSiblinNode = $firstSiblingDom->importNode($firstSibling, true);
-        // $firstSiblingDom->appendChild($firstSiblinNode);
-
-        // header(header: "Content-type: text/xml");
-        // echo $firstSiblingDom->saveXML();
-        // exit;
-        $newNode = $dom->importNode($signature->documentElement, true);
-        $parent->item(0)->insertBefore($newNode, $firstSibling);
-
-
-        // $newNode = $dom->importNode($signature->documentElement, TRUE);
-
-        // $parent->item(0)->insertBefore($newNode, $next->item(0));
-
-        // remove unused tags  
-        $content = $dom->saveXML();
-        // $content = $this->cleanUp($dom);
-
-
-        header("Content-type: text/xml");
-        echo $content;
-        exit;
-
-
-        // dd($data);
-
-        // $document = $data->toXmlArray();
-
-
-
-        // return $service->write('Invoice', $data->toXmlArray());
+        return $content;
     }
 
+    // in progress
+    public function generateJSONDocument($data)
+    {
+
+    }
 
     private function loadSignature(mixed $data)
     {
-
         $cert = new Cert(
             CertDigest: new CertDigest(
                 DigestMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmlenc#sha256']),
@@ -239,33 +132,32 @@ class MyInvois
             )
         );
 
-        // $references[] = [
-        //     'name' => 'Reference',
-        //     'value' => [
-        //         'name' => 'Transforms',
-        //         'value' => [
-        //             [
-        //                 'name' => 'Transform'
-        //                 'value' => 
-        //             ]
-        //         ]
-        //     ],
-        // ];
+        $transforms = [
+            (new Transform(
+                XPath: 'not(//ancestor-or-self::ext:UBLExtensions)'
+            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            (new Transform(
+                XPath: 'not(//ancestor-or-self::cac:Signature)'
+            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            (new Transform())->add('attributes', ['Algorithm' => 'http://www.w3.org/2001/10/xml-exc-c14n#']),
+        ];
+
+        $references = [
+            (new Reference(
+                Transforms: new Transforms(Transform: $transforms),
+                DigestMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmlenc#sha256']),
+                DigestValue: 'fRaWJINS9sB9aSl/MhCjMsdVMFpLwnxstpPhJkJwkU4=',
+            ))->add('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
+            (new Reference(
+                DigestMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmlenc#sha256']),
+                DigestValue: 'Tc9oNX8EuNQohWVDZeaPOHmeBU5tuwVdwIRyfltnTPw=',
+            ))->add('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
+        ];
 
         $signInfo = new SignedInfo(
             CanonicalizationMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/10/xml-exc-c14n#']),
             SignatureMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256']),
-            Reference: [
-                (new Reference(
-                    Transforms: [],
-                    DigestMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmlenc#sha256']),
-                    DigestValue: 'fRaWJINS9sB9aSl/MhCjMsdVMFpLwnxstpPhJkJwkU4=',
-                ))->add('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
-                new Reference(
-                    DigestMethod: new Data('', ['Algorithm' => 'http://www.w3.org/2001/04/xmlenc#sha256']),
-                    DigestValue: 'Tc9oNX8EuNQohWVDZeaPOHmeBU5tuwVdwIRyfltnTPw=',
-                )
-            ]
+            Reference: $references
         );
 
         $signature = new Signature(
@@ -299,6 +191,121 @@ class MyInvois
         return $UBLExtensions;
     }
 
+    private function createDOM(
+        string $version = '1.0',
+        string $encoding = 'UTF-8',
+        bool $preserveWhiteSpace = false,
+        bool $formatOutput = false
+    ): DOMDocument {
+        $dom = new DOMDocument($version, encoding: $encoding);
+        $dom->preserveWhiteSpace = $preserveWhiteSpace;
+        $dom->formatOutput = $formatOutput;
+
+        return $dom;
+    }
+
+    private function writeXml(Service $service, $rootElement = '', array $xml = []): string
+    {
+        $xmlData = $service->write($rootElement, $xml);
+
+        $dom = $this->createDOM();
+        $dom->loadXML($xmlData);
+
+        return $dom->saveXML();
+    }
+
+    private function displayXml(string $xml)
+    {
+        header("Content-type: text/xml");
+        echo $xml;
+        exit;
+    }
+
+    public function getClientId(): string
+    {
+        return $this->client_id;
+    }
+
+    public function getClientSecret(): string
+    {
+        return $this->client_secret;
+    }
+
+    public function isSandbox(): bool
+    {
+        return $this->config('sandbox.mode');
+    }
+
+    public function config(string $name): array|string|int|bool
+    {
+        return config('myinvois.' . $name);
+    }
+
+    public function __call($method, $arguments)
+    {
+        throw_if(!$this->getClientId(), LogicException::class, __('Missing Client ID.'));
+        throw_if(!$this->getClientSecret(), LogicException::class, __('Missing Client Secret.'));
+
+        if (count($arguments) > 0) {
+            $argumentCollection = collect($arguments);
+
+            try {
+                $argumentCollection->keys()->ensure('string');
+            } catch (\Throwable $th) {
+                // throw $th;
+                throw new LogicException(__('Please pass a named arguments in :method method.', ['method' => $method]));
+            }
+        }
+
+        $property_name = Str::of($method)->snake()->lower()->value;
+
+        if (in_array($property_name, $this->services)) {
+            $reformat_property_name = ucfirst(Str::camel($method));
+
+            $service_name = 'Laraditz\\MyInvois\\Services\\' . $reformat_property_name . 'Service';
+
+            return new $service_name(app('myinvois'));
+        } else {
+            throw new BadMethodCallException(sprintf(
+                'Method %s::%s does not exist.',
+                get_class(),
+                $method
+            ));
+        }
+    }
+
+    // old code, will remove?
+    private function removeUnusedAttributes(DOMDocument $dom, string $tagName, array $excepts = [])
+    {
+        $extensionContent = $dom->getElementsByTagName($tagName);
+        $extensionContentAttrs = $extensionContent?->item(0)?->getAttributeNames();
+
+        if (is_array($extensionContentAttrs) && count($extensionContentAttrs) > 0) {
+            foreach ($extensionContentAttrs as $extensionContentAttr) {
+                if (!in_array($extensionContentAttr, $excepts)) {
+                    $extensionContent->item(0)->removeAttribute($extensionContentAttr);
+                }
+
+            }
+        }
+    }
+
+    // old code, will remove
+    private function cleanUp(DOMDocument $dom)
+    {
+        $this->removeUnusedAttributes(dom: $dom, tagName: 'SignatureInformation');
+        $this->removeUnusedAttributes(dom: $dom, tagName: 'ExtensionContent');
+        $this->removeUnusedAttributes(dom: $dom, tagName: 'UBLExtensions', excepts: ['xmlns']);
+
+        $content = $dom->saveXML();
+        $content = str($content)
+            ->replace('UBLDocumentSignatures', 'sig:UBLDocumentSignatures')
+            ->value;
+
+        return $content;
+    }
+
+    // old code, will remove
     private function loadSignature2(mixed $data)
     {
         $extService = new Service();
@@ -355,69 +362,4 @@ class MyInvois
 
         return $extDom;
     }
-
-    public function generateJSONDocument($data)
-    {
-
-    }
-
-    private function createDOM(
-        string $version = '1.0',
-        string $encoding = 'UTF-8',
-        bool $preserveWhiteSpace = false,
-        bool $formatOutput = false
-    ): DOMDocument {
-        $dom = new DOMDocument($version, encoding: $encoding);
-        $dom->preserveWhiteSpace = $preserveWhiteSpace;
-        $dom->formatOutput = $formatOutput;
-
-        return $dom;
-    }
-
-    private function writeXml(Service $service, $rootElement = '', array $xml = []): string
-    {
-        $xmlData = $service->write($rootElement, $xml);
-
-        $dom = $this->createDOM();
-        $dom->loadXML($xmlData);
-
-        return $dom->saveXML();
-    }
-
-    private function displayXml(string $xml)
-    {
-        header("Content-type: text/xml");
-        echo $xml;
-        exit;
-    }
-
-    private function removeUnusedAttributes(DOMDocument $dom, string $tagName, array $excepts = [])
-    {
-        $extensionContent = $dom->getElementsByTagName($tagName);
-        $extensionContentAttrs = $extensionContent?->item(0)?->getAttributeNames();
-
-        if (is_array($extensionContentAttrs) && count($extensionContentAttrs) > 0) {
-            foreach ($extensionContentAttrs as $extensionContentAttr) {
-                if (!in_array($extensionContentAttr, $excepts)) {
-                    $extensionContent->item(0)->removeAttribute($extensionContentAttr);
-                }
-
-            }
-        }
-    }
-
-    private function cleanUp(DOMDocument $dom)
-    {
-        $this->removeUnusedAttributes(dom: $dom, tagName: 'SignatureInformation');
-        $this->removeUnusedAttributes(dom: $dom, tagName: 'ExtensionContent');
-        $this->removeUnusedAttributes(dom: $dom, tagName: 'UBLExtensions', excepts: ['xmlns']);
-
-        $content = $dom->saveXML();
-        $content = str($content)
-            ->replace('UBLDocumentSignatures', 'sig:UBLDocumentSignatures')
-            ->value;
-
-        return $content;
-    }
-
 }

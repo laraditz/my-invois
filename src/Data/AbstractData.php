@@ -93,6 +93,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
         $attributes = [];
         $propertyAttributes = [];
         $classAttributes = [];
+        $subdata = [];
 
         if (
             is_object($value)
@@ -125,29 +126,30 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
                 $body[] = $subdata;
 
             } elseif (property_exists($value, 'value')) {
-
                 $subdata = [
                     'name' => $name,
                     'value' => $value->value,
                 ];
 
-                if (count($attributes) > 0) {
+                if (
+                    property_exists($value, 'attributes')
+                    && count($value->attributes) > 0
+                ) {
                     $subdata['attributes'] = $value->attributes;
                 }
 
                 $body[] = $subdata;
             } else {
-
+                $subdata = [
+                    'name' => $name,
+                    'value' => $value->toXmlArray(),
+                ];
 
                 if (count($attributes) > 0) {
-                    $body[] = [
-                        'name' => $name,
-                        'value' => $value->toXmlArray(),
-                        'attributes' => $attributes
-                    ];
-                } else {
-                    $body[$name] = $value->toXmlArray();
+                    $subdata['attributes'] = $attributes;
                 }
+
+                $body[] = $subdata;
             }
 
         } elseif (is_string($value) || is_numeric($value)) {
@@ -177,43 +179,10 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
             } else {
 
                 foreach ($value as $key => $val) {
-                    $this->buildBody($body, $name, $val);
-
-                    // $subdata = null;
-
-                    // if (
-                    //     is_object($val)
-                    //     && Str::of(get_class($val))->startsWith('Laraditz\\MyInvois\\Data')
-                    // ) {
-                    //     if ($val instanceof Money) {
-                    //         $subdata = [
-                    //             'name' => $name,
-                    //             'value' => $val->value,
-                    //             'attributes' => ['currencyID' => $val->currencyID],
-                    //         ];
-
-                    //         $body[] = $subdata;
-                    //     } elseif (property_exists($val, 'value')) {
-
-                    //         $subdata = [
-                    //             'name' => $name,
-                    //             'value' => $val->value,
-                    //         ];
-
-                    //         if (property_exists($val, 'attributes')) {
-                    //             $subdata['attributes'] = $val->attributes;
-                    //         }
-
-                    //         $body[] = $subdata;
-                    //     } else {
-
-                    //         $body[] = [
-                    //             'name' => $name,
-                    //             'value' => $val->toXmlArray(),
-                    //         ];
-                    //     }
+                    // if ($name == 'cac:AdditionalDocumentReference' && $val?->ID == 'L1') {
+                    //     dd($name, $value, $val?->ID);
                     // }
-
+                    $this->buildBody($body, $name, $val);
                 }
             }
         } else {
