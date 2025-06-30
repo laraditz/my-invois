@@ -11,6 +11,7 @@ enum XMLNS: string
     case SAC = 'sac';
     case SBC = 'sbc';
     case DS = 'ds';
+    case XADES = 'xades';
     case NONE = '';
 
     public function getNamespace(): string
@@ -23,6 +24,7 @@ enum XMLNS: string
             static::SAC => 'urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2',
             static::SBC => 'urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2',
             static::DS => 'http://www.w3.org/2000/09/xmldsig#',
+            static::XADES => 'http://uri.etsi.org/01903/v1.3.2#',
             default => ''
         };
     }

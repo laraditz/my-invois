@@ -2,6 +2,8 @@
 
 namespace Laraditz\MyInvois\Data;
 
+use ReflectionParameter;
+use ReflectionProperty;
 use Sabre\Xml\Writer;
 use BadMethodCallException;
 use Illuminate\Support\Str;
@@ -57,26 +59,10 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     public function toXmlArray()
     {
         $body = [];
+
         $class = new \ReflectionClass(static::class);
 
         $constructor = $class->getConstructor();
-
-        // if (static::class == 'Laraditz\\MyInvois\\Data\\Invoice') {
-        //     // $attributes = $class->getAttributes(Attributes::class);
-        //     dd($class->getMethods(), $constructor->getParameters());
-        //     foreach ($class->getMethods() as $method) {
-        //         $attributes = $method->getAttributes(Attributes::class);
-
-        //         foreach ($attributes as $attribute) {
-        //             $listener = $attribute->newInstance();
-        //             dump($listener);
-        //         }
-
-        //     }
-        //     exit;
-        // }
-
-
 
         foreach ($constructor->getParameters() as $property) {
 
@@ -84,8 +70,6 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
 
                 $name = $property->name;
                 $value = $this->getValue($name);
-                $subdata = null;
-                $classAttributes = null;
 
                 $ns = $this->ns($name);
 
@@ -94,126 +78,134 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
                     $name = $ns->value . ':' . $name;
                 }
 
-
-                if (
-                    is_object($value)
-                    && Str::of(get_class($value))->startsWith('Laraditz\\MyInvois\\Data')
-                ) {
-                    $rc = new \ReflectionClass($value);
-                    $attributes = data_get($rc->getAttributes(Attributes::class), '0');
-                    if ($attributes) {
-                        $attribute = $attributes->newInstance();
-                        $classAttributes = $attribute->attrs;
-                    }
-
-
-                    if ($value instanceof Money) {
-                        $subdata = [
-                            'name' => $name,
-                            'value' => $value->value,
-                            'attributes' => ['currencyID' => $value->currencyID],
-                        ];
-
-                        $body[] = $subdata;
-
-                    } elseif (property_exists($value, 'value')) {
-
-                        $subdata = [
-                            'name' => $name,
-                            'value' => $value->value,
-                        ];
-
-                        if (property_exists($value, 'attributes')) {
-                            $subdata['attributes'] = $value->attributes;
-                        }
-
-                        $body[] = $subdata;
-                    } else {
-                        if ($classAttributes && is_array($classAttributes) && count($classAttributes) > 0) {
-                            $body[] = [
-                                'name' => $name,
-                                'value' => $value->toXmlArray(),
-                                'attributes' => $classAttributes
-                            ];
-                        } else {
-                            $body[$name] = $value->toXmlArray();
-                        }
-                    }
-
-                } elseif (is_string($value) || is_numeric($value)) {
-                    $body += [
-                        $name => $value
-                    ];
-                } elseif (is_bool($value)) {
-                    $body += [
-                        $name => $value === true ? 'true' : 'false'
-                    ];
-
-                } elseif (is_array($value)) {
-                    if (data_get($value, 'value')) {
-                        $data['name'] = $name;
-                        $data['value'] = data_get($value, 'value');
-
-                        $attributes = data_get($value, 'attributes');
-
-                        if ($attributes && is_array($attributes) && count($attributes) > 0) {
-                            $data['attributes'] = $attributes;
-                        }
-
-                        $body += [
-                            $data
-                        ];
-                    } else {
-
-                        foreach ($value as $key => $val) {
-                            // dd($val, $val->toXmlArray());
-                            $subdata = null;
-
-                            if (
-                                is_object($val)
-                                && Str::of(get_class($val))->startsWith('Laraditz\\MyInvois\\Data')
-                            ) {
-                                if ($val instanceof Money) {
-                                    $subdata = [
-                                        'name' => $name,
-                                        'value' => $val->value,
-                                        'attributes' => ['currencyID' => $val->currencyID],
-                                    ];
-
-                                    $body[] = $subdata;
-                                } elseif (property_exists($val, 'value')) {
-
-                                    $subdata = [
-                                        'name' => $name,
-                                        'value' => $val->value,
-                                    ];
-
-                                    if (property_exists($val, 'attributes')) {
-                                        $subdata['attributes'] = $val->attributes;
-                                    }
-
-                                    $body[] = $subdata;
-                                } else {
-
-                                    $body[] = [
-                                        'name' => $name,
-                                        'value' => $val->toXmlArray(),
-                                    ];
-                                }
-                            }
-
-                        }
-                    }
-                } else {
-                    // $body += [
-                    //     $name => $value
-                    // ];
-                }
-
+                $this->buildBody($body, $name, $value);
             }
         }
 
         return $body;
+    }
+
+    private function buildBody(array &$body, string $tagName, mixed $value)
+    {
+        $name = $tagName;
+        $classAttributes = null;
+
+        if (
+            is_object($value)
+            && Str::of(get_class($value))->startsWith('Laraditz\\MyInvois\\Data')
+        ) {
+            $rc = new \ReflectionClass($value);
+            $attributes = data_get($rc->getAttributes(Attributes::class), '0');
+            if ($attributes) {
+                $attribute = $attributes->newInstance();
+                $classAttributes = $attribute->attrs;
+            }
+
+
+            if ($value instanceof Money) {
+                $subdata = [
+                    'name' => $name,
+                    'value' => $value->value,
+                    'attributes' => ['currencyID' => $value->currencyID],
+                ];
+
+                $body[] = $subdata;
+
+            } elseif (property_exists($value, 'value')) {
+
+                $subdata = [
+                    'name' => $name,
+                    'value' => $value->value,
+                ];
+
+                if (property_exists($value, 'attributes')) {
+                    $subdata['attributes'] = $value->attributes;
+                }
+
+                $body[] = $subdata;
+            } else {
+                if ($classAttributes && is_array($classAttributes) && count($classAttributes) > 0) {
+                    $body[] = [
+                        'name' => $name,
+                        'value' => $value->toXmlArray(),
+                        'attributes' => $classAttributes
+                    ];
+                } else {
+                    $body[$name] = $value->toXmlArray();
+                }
+            }
+
+        } elseif (is_string($value) || is_numeric($value)) {
+            $body += [
+                $name => $value
+            ];
+        } elseif (is_bool($value)) {
+            $body += [
+                $name => $value === true ? 'true' : 'false'
+            ];
+
+        } elseif (is_array($value)) {
+
+            if (data_get($value, 'value')) {
+                $data['name'] = $name;
+                $data['value'] = data_get($value, 'value');
+
+                $attributes = data_get($value, 'attributes');
+
+                if ($attributes && is_array($attributes) && count($attributes) > 0) {
+                    $data['attributes'] = $attributes;
+                }
+
+                $body += [
+                    $data
+                ];
+            } else {
+
+                foreach ($value as $key => $val) {
+                    $this->buildBody($body, $name, $val);
+
+                    // $subdata = null;
+
+                    // if (
+                    //     is_object($val)
+                    //     && Str::of(get_class($val))->startsWith('Laraditz\\MyInvois\\Data')
+                    // ) {
+                    //     if ($val instanceof Money) {
+                    //         $subdata = [
+                    //             'name' => $name,
+                    //             'value' => $val->value,
+                    //             'attributes' => ['currencyID' => $val->currencyID],
+                    //         ];
+
+                    //         $body[] = $subdata;
+                    //     } elseif (property_exists($val, 'value')) {
+
+                    //         $subdata = [
+                    //             'name' => $name,
+                    //             'value' => $val->value,
+                    //         ];
+
+                    //         if (property_exists($val, 'attributes')) {
+                    //             $subdata['attributes'] = $val->attributes;
+                    //         }
+
+                    //         $body[] = $subdata;
+                    //     } else {
+
+                    //         $body[] = [
+                    //             'name' => $name,
+                    //             'value' => $val->toXmlArray(),
+                    //         ];
+                    //     }
+                    // }
+
+                }
+            }
+        } else {
+            // $body += [
+            //     $name => $value
+            // ];
+        }
     }
 
     public function xmlSerialize(Writer $writer): void
