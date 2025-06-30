@@ -7,16 +7,17 @@ use Laraditz\MyInvois\Enums\XMLNS;
 use Laraditz\MyInvois\Attributes\Attributes;
 use Laraditz\MyInvois\Traits\HasAttributes;
 
-#[Attributes(attrs: ['Id' => 'signature'])]
 class Signature extends AbstractData implements WithAttributes
 {
     use HasAttributes;
 
     public function __construct(
-        public SignedInfo $SignedInfo,
-        public string $SignatureValue,
-        public KeyInfo $KeyInfo,
-        public object $Object,
+        public ?string $ID = null,
+        public ?string $SignatureMethod = null,
+        public ?SignedInfo $SignedInfo = null,
+        public ?string $SignatureValue = null,
+        public ?KeyInfo $KeyInfo = null,
+        public ?DataObject $Object = null,
     ) {
     }
 
@@ -24,13 +25,7 @@ class Signature extends AbstractData implements WithAttributes
     {
         return match ($name) {
             'SignedInfo', 'SignatureValue', 'KeyInfo', 'Object' => XMLNS::DS,
+            'ID', 'SignatureMethod' => XMLNS::CBC
         };
-    }
-
-    public function getAttributes(): array
-    {
-        return [
-            'xmlns:' . XMLNS::DS() => XMLNS::DS->getNamespace(),
-        ];
     }
 }

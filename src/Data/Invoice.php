@@ -18,7 +18,7 @@ class Invoice extends AbstractData
         public ?DatePeriod $InvoicePeriod = null,
         public ?array $BillingReference = [],
         public ?array $AdditionalDocumentReference = [],
-        public ?array $Signature = [],
+        public ?Signature $Signature = null,
         public ?AccountingSupplierParty $AccountingSupplierParty = null,
         public ?AccountingCustomerParty $AccountingCustomerParty = null,
         public ?Delivery $Delivery = null,
@@ -47,7 +47,7 @@ class Invoice extends AbstractData
             'ID', 'IssueDate', 'IssueTime', 'InvoiceTypeCode', 'DocumentCurrencyCode', 'TaxCurrencyCode' => XMLNS::CBC,
             'InvoicePeriod', 'BillingReference', 'AdditionalDocumentReference', 'AccountingSupplierParty',
             'AccountingCustomerParty', 'Delivery', 'PaymentMeans', 'PaymentTerms', 'PrepaidPayment',
-            'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal', 'InvoiceLine' => XMLNS::CAC,
+            'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal', 'InvoiceLine', 'Signature' => XMLNS::CAC,
             'UBLExtensions' => XMLNS::NONE,
             default => null
         };
