@@ -2,16 +2,14 @@
 
 namespace Laraditz\MyInvois\Data;
 
+use Laraditz\MyInvois\Contracts\WithAttributes;
 use Laraditz\MyInvois\Enums\XMLNS;
-use Laraditz\MyInvois\Attributes\Attributes;
+use Laraditz\MyInvois\Traits\HasAttributes;
 
-#[Attributes(attrs: [
-    'xmlns:' . XMLNS::SIG->value => 'urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2',
-    'xmlns:' . XMLNS::SAC->value => 'urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2',
-    'xmlns:' . XMLNS::SBC->value => 'urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2'
-])]
-class UBLDocumentSignatures extends AbstractData
+class UBLDocumentSignatures extends AbstractData implements WithAttributes
 {
+    use HasAttributes;
+
     public function __construct(
         public SignatureInformation $SignatureInformation,
     ) {
@@ -21,7 +19,15 @@ class UBLDocumentSignatures extends AbstractData
     {
         return match ($name) {
             'SignatureInformation' => XMLNS::SAC,
-            default => null
         };
+    }
+
+    public function getAttributes(): array
+    {
+        return [
+            'xmlns:' . XMLNS::SIG() => XMLNS::SIG->getNamespace(),
+            'xmlns:' . XMLNS::SAC() => XMLNS::SAC->getNamespace(),
+            'xmlns:' . XMLNS::SBC() => XMLNS::SBC->getNamespace(),
+        ];
     }
 }

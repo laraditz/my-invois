@@ -2,9 +2,10 @@
 
 namespace Laraditz\MyInvois\Data;
 
-use ReflectionParameter;
-use ReflectionProperty;
+use ReflectionClass;
 use Sabre\Xml\Writer;
+use ReflectionProperty;
+use ReflectionParameter;
 use BadMethodCallException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -19,7 +20,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     public function toArray(): array
     {
         $body = [];
-        $class = new \ReflectionClass(static::class);
+        $class = new ReflectionClass(static::class);
 
         $constructor = $class->getConstructor();
 
@@ -34,10 +35,11 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
         return $body;
     }
 
+    // in progress
     public function toJson()
     {
         $body = [];
-        $class = new \ReflectionClass(static::class);
+        $class = new ReflectionClass(static::class);
 
         $constructor = $class->getConstructor();
 
@@ -60,7 +62,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     {
         $body = [];
 
-        $class = new \ReflectionClass(static::class);
+        $class = new ReflectionClass(static::class);
 
         $constructor = $class->getConstructor();
 
@@ -88,19 +90,30 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     private function buildBody(array &$body, string $tagName, mixed $value)
     {
         $name = $tagName;
-        $classAttributes = null;
+        $attributes = [];
+        $propertyAttributes = [];
+        $classAttributes = [];
 
         if (
             is_object($value)
             && Str::of(get_class($value))->startsWith('Laraditz\\MyInvois\\Data')
         ) {
-            $rc = new \ReflectionClass($value);
-            $attributes = data_get($rc->getAttributes(Attributes::class), '0');
-            if ($attributes) {
-                $attribute = $attributes->newInstance();
-                $classAttributes = $attribute->attrs;
+            // get class attributes
+            $rc = new ReflectionClass($value);
+            $rcAttributes = data_get($rc->getAttributes(Attributes::class), '0');
+            if ($rcAttributes) {
+                $attributeClass = $rcAttributes->newInstance();
+                $classAttributes = $attributeClass->attrs;
             }
 
+            if (
+                property_exists($value, 'attributes')
+                && method_exists($value, 'getAttributes')
+            ) {
+                $propertyAttributes = $value->getAttributes();
+            }
+
+            $attributes = [...$classAttributes, ...$propertyAttributes];
 
             if ($value instanceof Money) {
                 $subdata = [
@@ -118,17 +131,19 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
                     'value' => $value->value,
                 ];
 
-                if (property_exists($value, 'attributes')) {
+                if (count($attributes) > 0) {
                     $subdata['attributes'] = $value->attributes;
                 }
 
                 $body[] = $subdata;
             } else {
-                if ($classAttributes && is_array($classAttributes) && count($classAttributes) > 0) {
+
+
+                if (count($attributes) > 0) {
                     $body[] = [
                         'name' => $name,
                         'value' => $value->toXmlArray(),
-                        'attributes' => $classAttributes
+                        'attributes' => $attributes
                     ];
                 } else {
                     $body[$name] = $value->toXmlArray();
@@ -221,13 +236,14 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     public function add(string $name, mixed $value): static
     {
         if (property_exists(static::class, $name)) {
-            $rp = new \ReflectionProperty(static::class, $name);
+            $rp = new ReflectionProperty(static::class, $name);
 
-            if ($rp?->getType()?->getName() === 'array') {
-                $this->$name[] = $value;
-            } else {
-                $this->$name = $value;
-            }
+            // if ($rp?->getType()?->getName() === 'array') {
+            //     $this->$name[] = $value;
+            // } else {
+            //     $this->$name = $value;
+            // }
+            $this->$name = $value;
 
         } else {
             throw new BadMethodCallException(__('Property does not exists.'));
