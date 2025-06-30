@@ -3,13 +3,16 @@
 namespace Laraditz\MyInvois\Data;
 
 use Sabre\Xml\Writer;
+use BadMethodCallException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Sabre\Xml\XmlSerializable;
 use Laraditz\MyInvois\Enums\XMLNS;
 use Laraditz\MyInvois\Contracts\WithValue;
+use Laraditz\MyInvois\Attributes\Attributes;
 use Laraditz\MyInvois\Contracts\WithNamespace;
 
-abstract class AbstractData implements WithNamespace, WithValue
+abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
 {
     public function toArray(): array
     {
@@ -53,13 +56,27 @@ abstract class AbstractData implements WithNamespace, WithValue
 
     public function toXmlArray()
     {
-        $class = new \ReflectionClass(static::class);
-        // $service = new \Sabre\Xml\Service();
-
         $body = [];
         $class = new \ReflectionClass(static::class);
 
         $constructor = $class->getConstructor();
+
+        // if (static::class == 'Laraditz\\MyInvois\\Data\\Invoice') {
+        //     // $attributes = $class->getAttributes(Attributes::class);
+        //     dd($class->getMethods(), $constructor->getParameters());
+        //     foreach ($class->getMethods() as $method) {
+        //         $attributes = $method->getAttributes(Attributes::class);
+
+        //         foreach ($attributes as $attribute) {
+        //             $listener = $attribute->newInstance();
+        //             dump($listener);
+        //         }
+
+        //     }
+        //     exit;
+        // }
+
+
 
         foreach ($constructor->getParameters() as $property) {
 
@@ -68,18 +85,28 @@ abstract class AbstractData implements WithNamespace, WithValue
                 $name = $property->name;
                 $value = $this->getValue($name);
                 $subdata = null;
+                $classAttributes = null;
 
                 $ns = $this->ns($name);
 
-                if ($ns && $ns instanceof XMLNS) {
+                if ($ns && $ns instanceof XMLNS && $ns->value !== '') {
                     // $name = '{' . $ns->getNamespace() . '}' . $name;
                     $name = $ns->value . ':' . $name;
                 }
+
 
                 if (
                     is_object($value)
                     && Str::of(get_class($value))->startsWith('Laraditz\\MyInvois\\Data')
                 ) {
+                    $rc = new \ReflectionClass($value);
+                    $attributes = data_get($rc->getAttributes(Attributes::class), '0');
+                    if ($attributes) {
+                        $attribute = $attributes->newInstance();
+                        $classAttributes = $attribute->attrs;
+                    }
+
+
                     if ($value instanceof Money) {
                         $subdata = [
                             'name' => $name,
@@ -90,6 +117,7 @@ abstract class AbstractData implements WithNamespace, WithValue
                         $body[] = $subdata;
 
                     } elseif (property_exists($value, 'value')) {
+
                         $subdata = [
                             'name' => $name,
                             'value' => $value->value,
@@ -101,7 +129,15 @@ abstract class AbstractData implements WithNamespace, WithValue
 
                         $body[] = $subdata;
                     } else {
-                        $body[$name] = $value->toXmlArray();
+                        if ($classAttributes && is_array($classAttributes) && count($classAttributes) > 0) {
+                            $body[] = [
+                                'name' => $name,
+                                'value' => $value->toXmlArray(),
+                                'attributes' => $classAttributes
+                            ];
+                        } else {
+                            $body[$name] = $value->toXmlArray();
+                        }
                     }
 
                 } elseif (is_string($value) || is_numeric($value)) {
@@ -146,6 +182,7 @@ abstract class AbstractData implements WithNamespace, WithValue
 
                                     $body[] = $subdata;
                                 } elseif (property_exists($val, 'value')) {
+
                                     $subdata = [
                                         'name' => $name,
                                         'value' => $val->value,
@@ -157,6 +194,7 @@ abstract class AbstractData implements WithNamespace, WithValue
 
                                     $body[] = $subdata;
                                 } else {
+
                                     $body[] = [
                                         'name' => $name,
                                         'value' => $val->toXmlArray(),
@@ -178,8 +216,31 @@ abstract class AbstractData implements WithNamespace, WithValue
         return $body;
     }
 
+    public function xmlSerialize(Writer $writer): void
+    {
+        $writer->write($this->toXmlArray());
+    }
+
     public function getValue(string $name): mixed
     {
         return $this->$name;
+    }
+
+    public function add(string $name, mixed $value): static
+    {
+        if (property_exists(static::class, $name)) {
+            $rp = new \ReflectionProperty(static::class, $name);
+
+            if ($rp?->getType()?->getName() === 'array') {
+                $this->$name[] = $value;
+            } else {
+                $this->$name = $value;
+            }
+
+        } else {
+            throw new BadMethodCallException(__('Property does not exists.'));
+        }
+
+        return $this;
     }
 }

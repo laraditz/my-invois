@@ -8,15 +8,17 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class Invoice extends AbstractData
 {
     public function __construct(
-        public string $ID,
-        public Carbon|string $IssueDate,
-        public Carbon|string $IssueTime,
-        public Data $InvoiceTypeCode,
-        public string $DocumentCurrencyCode,
-        public string $TaxCurrencyCode,
+        public ?UBLExtensions $UBLExtensions = null,
+        public ?string $ID = null,
+        public null|Carbon|string $IssueDate = null,
+        public null|Carbon|string $IssueTime = null,
+        public ?Data $InvoiceTypeCode = null,
+        public ?string $DocumentCurrencyCode = null,
+        public ?string $TaxCurrencyCode = null,
         public ?DatePeriod $InvoicePeriod = null,
-        public array $BillingReference = [],
+        public ?array $BillingReference = [],
         public ?array $AdditionalDocumentReference = [],
+        public ?array $Signature = [],
         public ?AccountingSupplierParty $AccountingSupplierParty = null,
         public ?AccountingCustomerParty $AccountingCustomerParty = null,
         public ?Delivery $Delivery = null,
@@ -27,8 +29,6 @@ class Invoice extends AbstractData
         public ?TaxTotal $TaxTotal = null,
         public ?LegalMonetaryTotal $LegalMonetaryTotal = null,
         public ?array $InvoiceLine = [],
-        public ?array $UBLExtensions = [],
-        public ?array $Signature = [],
     ) {
     }
 
@@ -48,6 +48,7 @@ class Invoice extends AbstractData
             'InvoicePeriod', 'BillingReference', 'AdditionalDocumentReference', 'AccountingSupplierParty',
             'AccountingCustomerParty', 'Delivery', 'PaymentMeans', 'PaymentTerms', 'PrepaidPayment',
             'AllowanceCharge', 'TaxTotal', 'LegalMonetaryTotal', 'InvoiceLine' => XMLNS::CAC,
+            'UBLExtensions' => XMLNS::NONE,
             default => null
         };
     }
