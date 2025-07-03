@@ -205,7 +205,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
     public function add(string $name, mixed $value): static
     {
         if (property_exists(static::class, $name)) {
-            $rp = new ReflectionProperty(static::class, $name);
+            // $rp = new ReflectionProperty(static::class, $name);
 
             // if ($rp?->getType()?->getName() === 'array') {
             //     $this->$name[] = $value;

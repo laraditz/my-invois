@@ -57,8 +57,16 @@ class MyInvoisServiceProvider extends ServiceProvider
         $this->app->singleton('myinvois', function () {
             return new MyInvois(
                 client_id: config('myinvois.client_id'),
-                client_secret: config('myinvois.client_secret')
+                client_secret: config('myinvois.client_secret'),
+                is_sandbox: config('myinvois.sandbox.mode'),
+                certificate_path: config('myinvois.certificate_path'),
+                private_key_path: config('myinvois.private_key_path'),
+                passphrase: config('myinvois.passphrase'),
             );
+        });
+
+        $this->app->singleton('myinvoishelper', function () {
+            return new MyInvoisHelper();
         });
     }
 

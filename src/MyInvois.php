@@ -3,6 +3,7 @@
 namespace Laraditz\MyInvois;
 
 use DOMDocument;
+use Laraditz\MyInvois\Data\Invoice;
 use LogicException;
 use Sabre\Xml\Service;
 use BadMethodCallException;
@@ -19,7 +20,10 @@ class MyInvois
     public function __construct(
         private string $client_id,
         private string $client_secret,
-        private ?bool $is_sandbox = null,
+        private bool $is_sandbox = false,
+        private ?string $certificate_path = null,
+        private ?string $private_key_path = null,
+        private ?string $passphrase = null,
     ) {
     }
 
@@ -40,49 +44,58 @@ class MyInvois
                 scope: 'InvoicingAPI'
             );
 
-            $accessToken = data_get($myinvois, 'access_token');
+            $accessToken = data_get($myinvois, 'data.access_token');
 
             if (!$accessToken) {
-                throw new MyInvoisApiError($result ?? ['code' => __('Missing an access token')]);
+                throw new MyInvoisApiError($result ?? ['code' => __('Missing an access token.')]);
             }
 
             return $accessToken;
         }
     }
 
-    public function generateDocument(mixed $data, Format $format, bool $hasSignature = true)
+    public function generateDocument(Invoice $data, Format $format)
     {
         return match ($format) {
-            Format::XML => $this->generateXMLDocument($data, $hasSignature),
-            Format::JSON => $this->generateJSONDocument($data),
+            Format::XML => $this->generateXMLDocument(data: $data),
+            Format::JSON => $this->generateJSONDocument(data: $data),
         };
     }
 
-    public function generateXMLDocument($data, bool $hasSignature = true)
+    public function generateXMLDocument(Invoice $data)
     {
-        $service = new Service();
-        $ns = 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2';
+        $hasSignature = false;
+        $helper = new MyInvoisHelper();
+        $service = $helper->createInvoiceXMLService();
 
-        $service->namespaceMap = [
-            $ns => '',
-            XMLNS::CAC->getNamespace() => XMLNS::CAC(),
-            XMLNS::CBC->getNamespace() => XMLNS::CBC(),
-        ];
+        if (
+            $this->isFileExists($this->getCertificatePath())
+            && $this->isFileExists($this->getPrivateKeyPath())
+        ) {
+            $hasSignature = true;
+        }
 
-        $sig = new MyInvoisSignature($data);
+        if ($hasSignature === true) {
+            // add signature to document
+            $sig = new MyInvoisSignature(
+                document: $data,
+                certificatePath: $this->getCertificatePath(),
+                privateKeyPath: $this->getPrivateKeyPath(),
+                passphrase: $this->getPassphrase()
+            );
 
-        // add signature to document
-        $data->add('UBLExtensions', $sig->getUBLExtensions())
-            ->add('Signature', $sig->getSignature());
+            $data->add('UBLExtensions', $sig->getUBLExtensions())
+                ->add('Signature', $sig->getSignature());
+        }
 
-        $content = $this->writeXml($service, 'Invoice', $data->toXmlArray());
-        // $this->displayXml($content);
+        $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());
+        // $helper->displayXml($content);
 
         return $content;
     }
 
     // in progress
-    public function generateJSONDocument($data)
+    public function generateJSONDocument(Invoice $data)
     {
 
     }
@@ -100,23 +113,6 @@ class MyInvois
         return $dom;
     }
 
-    private function writeXml(Service $service, $rootElement = '', array $xml = []): string
-    {
-        $xmlData = $service->write($rootElement, $xml);
-
-        $dom = $this->createDOM();
-        $dom->loadXML($xmlData);
-
-        return $dom->saveXML();
-    }
-
-    private function displayXml(string $xml)
-    {
-        header("Content-type: text/xml");
-        echo $xml;
-        exit;
-    }
-
     public function getClientId(): string
     {
         return $this->client_id;
@@ -129,12 +125,36 @@ class MyInvois
 
     public function isSandbox(): bool
     {
-        return $this->is_sandbox !== null ? $this->is_sandbox : $this->config('sandbox.mode');
+        return $this->is_sandbox;
+    }
+
+    public function getCertificatePath(): ?string
+    {
+        return $this->certificate_path;
+    }
+
+    public function getPrivateKeyPath(): ?string
+    {
+        return $this->private_key_path;
+    }
+
+    public function getPassphrase(): ?string
+    {
+        return $this->passphrase;
     }
 
     public function config(string $name): array|string|int|bool
     {
         return config('myinvois.' . $name);
+    }
+
+    private function isFileExists(string $path): bool
+    {
+        if ($path && is_file($path) && file_exists($path)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function __call($method, $arguments)

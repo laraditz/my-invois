@@ -7,7 +7,7 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class UBLExtension extends AbstractData
 {
     public function __construct(
-        public string $ExtensionURI = 'urn:oasis:names:specification:ubl:dsig:enveloped:xades',
+        public ?string $ExtensionURI = null,
         public ?ExtensionContent $ExtensionContent = null,
     ) {
     }

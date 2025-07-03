@@ -51,7 +51,8 @@
         "Laraditz\\MyInvois\\MyInvoisServiceProvider"
       ],
       "aliases": {
-        "MyInvois": "Laraditz\\MyInvois\\Facades\\MyInvois"
+        "MyInvois": "Laraditz\\MyInvois\\Facades\\MyInvois",
+        "MyInvoisHelper": "Laraditz\\MyInvois\\Facades\\MyInvoisHelper"
       }
     }
   }
