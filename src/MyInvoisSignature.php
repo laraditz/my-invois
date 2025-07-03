@@ -2,8 +2,7 @@
 
 namespace Laraditz\MyInvois;
 
-use Carbon\Carbon;
-use Laraditz\MyInvois\Exceptions\MyInvoisException;
+use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Data\Cert;
 use Laraditz\MyInvois\Data\Data;
 use Laraditz\MyInvois\Enums\XMLNS;
@@ -26,6 +25,7 @@ use Laraditz\MyInvois\Data\SigningCertificate;
 use Laraditz\MyInvois\Data\QualifyingProperties;
 use Laraditz\MyInvois\Data\SignatureInformation;
 use Laraditz\MyInvois\Data\UBLDocumentSignatures;
+use Laraditz\MyInvois\Exceptions\MyInvoisException;
 use Laraditz\MyInvois\Data\SignedSignatureProperties;
 
 /**
@@ -43,7 +43,7 @@ class MyInvoisSignature
 
     private $hashAlgorithm = 'sha256';
 
-    private $signAlgorithm = 'RSA-SHA256';
+    private $signAlgorithm = OPENSSL_ALGO_SHA256;
 
     public bool $hasSignature = false;
 
