@@ -17,6 +17,8 @@ class MyInvois
 {
     private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
 
+    private $hashAlgorithm = 'sha256';
+
     public function __construct(
         private string $client_id,
         private string $client_secret,
@@ -141,6 +143,11 @@ class MyInvois
     public function getPassphrase(): ?string
     {
         return $this->passphrase;
+    }
+
+    public function getHashAlgorithm()
+    {
+        return $this->hashAlgorithm;
     }
 
     public function config(string $name): array|string|int|bool

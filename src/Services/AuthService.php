@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class AuthService extends BaseService
 {
 
-    public function afterTokenRequest(MyinvoisRequest $request, array $result = []): void
+    public function afterTokenResponse(MyinvoisRequest $request, array $result = []): void
     {
         DB::transaction(function () use ($request, $result) {
             $access_token = data_get($result, 'access_token');

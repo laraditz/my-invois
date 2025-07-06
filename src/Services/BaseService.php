@@ -3,15 +3,16 @@
 namespace Laraditz\MyInvois\Services;
 
 use BadMethodCallException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Laraditz\MyInvois\MyInvois;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
+use Laraditz\MyInvois\Services\AuthService;
 use Illuminate\Http\Client\RequestException;
 use Laraditz\MyInvois\Models\MyinvoisRequest;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
-use Laraditz\MyInvois\Services\AuthService;
 
 class BaseService
 {
@@ -22,6 +23,8 @@ class BaseService
     public string $fqcn;
 
     public PendingRequest $client;
+
+    protected array $sensitiveParams = ['client_secret'];
 
     public function __construct(
         public MyInvois $myInvois,
@@ -86,13 +89,13 @@ class BaseService
         $payload = $this->getPayload();
         $savePayload = $this->sanitizePayload($payload);
 
-        // dd($url, $savePayload);
-
         $request = MyinvoisRequest::create([
             'action' => $this->serviceName . '::' . $this->methodName,
             'url' => $url,
             'payload' => $savePayload && count($savePayload) > 0 ? $savePayload : null,
         ]);
+
+        $this->afterRequest(request: $request);
 
         $response = $payload && count($payload) > 0
             ? $this->client->$method($url, $payload)
@@ -118,6 +121,7 @@ class BaseService
 
             $request->update([
                 'http_code' => $response->getStatusCode() ?? $response->status(),
+                'response' => $error && is_array($error) ? $result : null,
                 'correlation_id' => $correlationId,
                 'error_code' => $errorCode,
                 'error_message' => $errorMessage,
@@ -141,10 +145,11 @@ class BaseService
                 'response' => $result,
             ]);
 
-            $this->afterRequest(request: $request, result: $result);
+            $this->afterResponse(request: $request, result: $result);
 
             $return = [
                 'success' => $http_code >= 200 && $http_code < 300 ? true : false,
+                'request_id' => $request?->id,
             ];
 
             if ($result) {
@@ -213,13 +218,11 @@ class BaseService
     {
         if ($payload && count($payload) > 0) {
             $sensitiveParams = $this->getSensitiveParams();
+            if (Arr::hasAny($payload, $sensitiveParams)) {
+                Arr::forget($payload, $sensitiveParams);
+            }
 
-            $payloadCollection = collect($payload)->reject(function ($value, $key) use ($sensitiveParams) {
-                return in_array($key, $sensitiveParams);
-            });
-
-            return $payloadCollection->toArray();
-
+            return $payload;
         }
 
         return null;
@@ -234,7 +237,12 @@ class BaseService
 
     protected function getSensitiveParams()
     {
-        return ['client_secret'];
+        return $this->sensitiveParams;
+    }
+
+    protected function setSensitiveParams(array $sensitiveParams): array
+    {
+        return $this->sensitiveParams = $sensitiveParams;
     }
 
     private function beforeRequest(): void
@@ -246,9 +254,18 @@ class BaseService
         }
     }
 
-    private function afterRequest(MyinvoisRequest $request, ?array $result = []): void
+    private function afterRequest(MyinvoisRequest $request): void
     {
         $methodName = 'after' . Str::studly($this->methodName) . 'Request';
+
+        if (method_exists($this, $methodName)) {
+            $this->$methodName($request);
+        }
+    }
+
+    private function afterResponse(MyinvoisRequest $request, ?array $result = []): void
+    {
+        $methodName = 'after' . Str::studly($this->methodName) . 'Response';
 
         if (method_exists($this, $methodName)) {
             $this->$methodName($request, $result);

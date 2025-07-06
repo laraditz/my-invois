@@ -52,4 +52,9 @@ class Invoice extends AbstractData
             default => null
         };
     }
+
+    public function getCodeNumber()
+    {
+        return $this->ID;
+    }
 }
