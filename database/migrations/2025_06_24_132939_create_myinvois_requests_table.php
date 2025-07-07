@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Laraditz\MyInvois\Models\MyinvoisClient;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration {
     /**
@@ -12,6 +13,7 @@ return new class extends Migration {
     {
         Schema::create('myinvois_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignIdFor(MyinvoisClient::class, 'client_id');
             $table->string('action')->nullable();
             $table->text('url')->nullable();
             $table->json('payload')->nullable();
@@ -23,6 +25,10 @@ return new class extends Migration {
             $table->string('error_message')->nullable();
             $table->string('error_description')->nullable();
             $table->timestamps();
+
+            $table->index('client_id');
+            $table->index('action');
+            $table->index('http_code');
         });
     }
 

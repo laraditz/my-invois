@@ -10,6 +10,7 @@ use Laraditz\MyInvois\Enums\InvoiceType;
 class MyinvoisDocument extends Model
 {
     protected $fillable = [
+        'client_id',
         'request_id',
         'code_number',
         'type',
@@ -21,6 +22,8 @@ class MyinvoisDocument extends Model
         'submission_uid',
         'uuid',
         'error',
+        'error_code',
+        'error_message',
         'accepted_at',
         'rejected_at'
     ];
@@ -39,5 +42,10 @@ class MyinvoisDocument extends Model
     public function request(): BelongsTo
     {
         return $this->belongsTo(MyinvoisRequest::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(MyinvoisClient::class);
     }
 }

@@ -86,16 +86,100 @@ class DocumentService extends BaseService
                     $file_path = null;
                 }
 
-                $myInvoisDocument = MyinvoisDocument::create([
+                $client_id = $request->client_id;
+
+                $myInvoisDocument = MyinvoisDocument::query()
+                    ->where('client_id', $client_id)
+                    ->where('code_number', $codeNumber)
+                    ->first();
+
+                $updateData = [
                     'request_id' => $request->id,
-                    'code_number' => $codeNumber,
                     'type' => $invoiceType,
                     'format' => $format,
                     'file_name' => $file_name,
                     'file_path' => $file_path,
                     'disk' => $disk,
                     'hash' => $hash,
-                ]);
+                    'submission_uid' => null,
+                    'uuid' => null,
+                    'error' => null,
+                    'accepted_at' => null,
+                    'rejected_at' => null,
+                ];
+
+                if (!$myInvoisDocument) {
+                    $myInvoisDocument = MyinvoisDocument::create([
+                        ...[
+                            'client_id' => $client_id,
+                            'code_number' => $codeNumber,
+                        ],
+                        ...$updateData
+                    ]);
+                } else {
+
+                    // Remove existing file
+                    $storage = Storage::disk($myInvoisDocument->disk);
+
+                    if ($storage->exists($myInvoisDocument->file_path)) {
+                        $storage->delete($myInvoisDocument->file_path);
+                    }
+
+                    $myInvoisDocument = tap($myInvoisDocument)->update($updateData);
+                }
+            }
+        }
+    }
+
+    public function afterSubmitResponse(MyinvoisRequest $request, array $result = []): void
+    {
+        $acceptedDocuments = data_get($result, 'acceptedDocuments');
+        $rejectedDocuments = data_get($result, 'rejectedDocuments');
+
+        if ($acceptedDocuments && is_array($acceptedDocuments) && count($acceptedDocuments) > 0) {
+            foreach ($acceptedDocuments as $acceptedDocument) {
+                $invoiceCodeNumber = data_get($acceptedDocument, 'invoiceCodeNumber');
+                $uuid = data_get($acceptedDocument, 'uuid');
+
+                if ($invoiceCodeNumber) {
+                    $myInvoisDocument = MyinvoisDocument::query()
+                        ->where('request_id', $request->id)
+                        ->where('code_number', $invoiceCodeNumber)
+                        ->first();
+
+                    if ($myInvoisDocument) {
+                        $myInvoisDocument->update([
+                            'uuid' => $uuid,
+                            'accepted_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        }
+
+        if ($rejectedDocuments && is_array($rejectedDocuments) && count($rejectedDocuments) > 0) {
+            foreach ($rejectedDocuments as $rejectedDocument) {
+                $invoiceCodeNumber = data_get($rejectedDocument, 'invoiceCodeNumber');
+                $error = data_get($rejectedDocument, 'error');
+                $errorCode = data_get($error, 'code');
+                $errorMessage = data_get($error, 'message');
+                $errorDetails = data_get($error, 'details');
+
+                if ($invoiceCodeNumber) {
+                    $myInvoisDocument = MyinvoisDocument::query()
+                        ->where('request_id', $request->id)
+                        ->where('code_number', $invoiceCodeNumber)
+                        ->first();
+
+                    if ($myInvoisDocument) {
+                        $myInvoisDocument->update([
+                            'error' => $errorDetails && is_array($errorDetails) ? $errorDetails : null,
+                            'error_code' => $errorCode,
+                            'error_message' => $errorMessage,
+                            'rejected_at' => now(),
+                        ]);
+                    }
+                }
             }
         }
     }

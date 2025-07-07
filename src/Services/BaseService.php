@@ -90,6 +90,7 @@ class BaseService
         $savePayload = $this->sanitizePayload();
 
         $request = MyinvoisRequest::create([
+            'client_id' => $this->myInvois->getClientId(),
             'action' => $this->serviceName . '::' . $this->methodName,
             'url' => $url,
             'payload' => $savePayload && count($savePayload) > 0 ? $savePayload : null,

@@ -4,12 +4,14 @@ namespace Laraditz\MyInvois\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MyinvoisRequest extends Model
 {
     use HasUuids;
 
     protected $fillable = [
+        'client_id',
         'action',
         'url',
         'payload',
@@ -28,5 +30,10 @@ class MyinvoisRequest extends Model
             'payload' => 'json',
             'response' => 'json',
         ];
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(MyinvoisClient::class);
     }
 }
