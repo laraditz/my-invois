@@ -26,6 +26,8 @@ class MyInvois
         private ?string $certificate_path = null,
         private ?string $private_key_path = null,
         private ?string $passphrase = null,
+        private ?string $disk = 'local',
+        private ?string $document_path = null,
     ) {
     }
 
@@ -145,9 +147,19 @@ class MyInvois
         return $this->passphrase;
     }
 
-    public function getHashAlgorithm()
+    public function getHashAlgorithm(): string
     {
         return $this->hashAlgorithm;
+    }
+
+    public function getDocumentPath(): string
+    {
+        return $this->document_path;
+    }
+
+    public function getDisk(): string
+    {
+        return $this->disk;
     }
 
     public function config(string $name): array|string|int|bool

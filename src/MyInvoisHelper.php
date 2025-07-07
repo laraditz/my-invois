@@ -79,7 +79,4 @@ class MyInvoisHelper
 
         return $string;
     }
-
-
-
 }

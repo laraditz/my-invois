@@ -62,6 +62,8 @@ class MyInvoisServiceProvider extends ServiceProvider
                 certificate_path: config('myinvois.certificate_path'),
                 private_key_path: config('myinvois.private_key_path'),
                 passphrase: config('myinvois.passphrase'),
+                disk: config('myinvois.disk'),
+                document_path: config('myinvois.document_path'),
             );
         });
 

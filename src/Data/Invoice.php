@@ -57,4 +57,9 @@ class Invoice extends AbstractData
     {
         return $this->ID;
     }
+
+    public function getInvoiceTypeCode()
+    {
+        return $this->InvoiceTypeCode?->value;
+    }
 }

@@ -26,6 +26,8 @@ class BaseService
 
     protected array $sensitiveParams = ['client_secret'];
 
+    protected array $removeParams = [];
+
     public function __construct(
         public MyInvois $myInvois,
         private ?string $route = '',
@@ -86,8 +88,8 @@ class BaseService
             $url = $url . '?' . http_build_query($queryString);
         }
 
-        $payload = $this->getPayload();
-        $savePayload = $this->sanitizePayload($payload);
+        $payload = $this->getFinalPayload();
+        $savePayload = $this->sanitizePayload();
 
         $request = MyinvoisRequest::create([
             'action' => $this->serviceName . '::' . $this->methodName,
@@ -214,8 +216,10 @@ class BaseService
         $this->setRoute($route_path);
     }
 
-    private function sanitizePayload(?array $payload): ?array
+    private function sanitizePayload(): ?array
     {
+        $payload = $this->getPayload();
+
         if ($payload && count($payload) > 0) {
             $sensitiveParams = $this->getSensitiveParams();
             if (Arr::hasAny($payload, $sensitiveParams)) {
@@ -228,21 +232,25 @@ class BaseService
         return null;
     }
 
+    private function getFinalPayload(): array
+    {
+        $payload = $this->getPayload();
+        $removeParams = $this->getRemoveParams();
+
+        if ($payload && count($payload) > 0 && $removeParams && count($removeParams) > 0) {
+            if (Arr::hasAny($payload, $removeParams)) {
+                Arr::forget($payload, $removeParams);
+            }
+        }
+
+        return $payload;
+    }
+
     protected function getAllowedMethods(): array
     {
         $route_prefix = str($this->serviceName)->remove('Service')->snake()->lower()->value;
 
         return array_keys(config('myinvois.routes.' . $route_prefix) ?? []);
-    }
-
-    protected function getSensitiveParams()
-    {
-        return $this->sensitiveParams;
-    }
-
-    protected function setSensitiveParams(array $sensitiveParams): array
-    {
-        return $this->sensitiveParams = $sensitiveParams;
     }
 
     private function beforeRequest(): void
@@ -336,6 +344,26 @@ class BaseService
     protected function getPayload(): array
     {
         return $this->payload;
+    }
+
+    protected function getSensitiveParams()
+    {
+        return $this->sensitiveParams;
+    }
+
+    protected function setSensitiveParams(array $sensitiveParams): array
+    {
+        return $this->sensitiveParams = $sensitiveParams;
+    }
+
+    protected function getRemoveParams(): array
+    {
+        return $this->removeParams;
+    }
+
+    protected function setRemoveParams(array $removeParams): array
+    {
+        return $this->removeParams = $removeParams;
     }
 
     public function queryString(array $queryString): self

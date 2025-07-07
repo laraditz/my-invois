@@ -34,6 +34,7 @@ use Laraditz\MyInvois\Data\SignedSignatureProperties;
 class MyInvoisSignature
 {
     private UBLExtensions $UBLExtensions;
+
     private Signature $signature;
 
     private ?MyInvoisCertificate $certificate = null;

@@ -12,6 +12,8 @@ return [
         'mode' => env('MYINVOIS_SANDBOX', false),
         'base_url' => 'https://preprod-api.myinvois.hasil.gov.my',
     ],
+    'disk' => env('MYINVOIS_DISK', 'local'),
+    'document_path' => env('MYINVOIS_DOCUMENT_PATH', 'myinvois/'),
     'certificate_path' => env('MYINVOIS_CERTIFICATE_PATH', storage_path('app/myinvois.p12')),
     'private_key_path' => env('MYINVOIS_PRIVATE_KEY_PATH', storage_path('app/myinvois.pem')),
     'passphrase' => env('MYINVOIS_PASSPHRASE'),
