@@ -45,7 +45,7 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 | auth()         | token()     | Generate access token for API call.                                        |
 | documentType() | all()       | Retrieve list of document types published by the MyInvois System.          |
 |                | get()       | Returns document type object with additional details.                      |
-|                | versions()  | Returns full document type version object.                                 |
+|                | version()   | Returns full document type version object.                                 |
 | document()     | submit()    | Allows taxpayer to submit one or more signed documents to MyInvois System. |
 
 ## Usage
