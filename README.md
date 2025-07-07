@@ -146,9 +146,13 @@ $documentTypes = MyInvois::documentType()->all();
 
 // Get document type by ID
 $documentType = MyInvois::documentType()->params(['id' => 1])->get();
+// OR you can directly call like this by providing the id in get()
+$documentType = MyInvois::documentType()->get(1);
 
 // Get document type version
 $version = MyInvois::documentType()->params(['id' => 1, 'vid' => '1.0'])->version();
+// OR you can directly call like this by providing the id and vid in version()
+MyInvois::documentType()->version(id: 1, vid: 2);
 ```
 
 ### Document Submission

@@ -64,8 +64,6 @@ class BaseService
                 $this->setPayload($arguments);
             }
 
-            $this->setRouteFromConfig($this->fqcn, $methodName);
-
             return $this->execute();
         }
 
@@ -80,6 +78,7 @@ class BaseService
     {
         $this->beforeRequest();
 
+        $this->setRouteFromConfig($this->fqcn, $this->methodName); // set final URL
         $method = $this->getMethod();
         $url = $this->getUrl();
         $queryString = $this->getQueryString();
