@@ -34,14 +34,14 @@ Configure your variables in your `.env` file (recommended) or publish the config
 **Required Variables:**
 
 ```
-MYINVOIS_CLIENT_ID="<your_myinvois_client_id>"
-MYINVOIS_CLIENT_SECRET="<your_myinvois_client_secret>"
+MYINVOIS_CLIENT_ID="<your_client_id>"
+MYINVOIS_CLIENT_SECRET="<your_client_secret>"
 ```
 
 **Optional Variables:**
 
 ```
-MYINVOIS_PASSPHRASE="<your_myinvois_passpharase>" // if required
+MYINVOIS_PASSPHRASE="<your_passpharase>" // if required
 MYINVOIS_SANDBOX=true // set true for testing, false for production
 MYINVOIS_DISK="local" // disk for storing documents
 MYINVOIS_DOCUMENT_PATH="myinvois/" // path for storing documents
@@ -139,7 +139,7 @@ $accessToken = MyInvois::auth()->token(
 );
 
 // Get access token on behalf of
-$accessToken = MyInvois::auth()->token(onbehalfof: 'C25845632020');
+$accessToken = MyInvois::auth()->token(onbehalfof: 'C25845632020'); // taxpayer's TIN or ROB number
 ```
 
 ### Document Types
@@ -152,12 +152,12 @@ $documentTypes = MyInvois::documentType()->all();
 
 // Get document type by ID
 $documentType = MyInvois::documentType()->params(['id' => 1])->get();
-// OR you can directly call like this by providing the id in get()
+// OR call directly by providing the id in get()
 $documentType = MyInvois::documentType()->get(1);
 
 // Get document type version
 $version = MyInvois::documentType()->params(['id' => 1, 'vid' => 2])->version();
-// OR you can directly call like this by providing the id and vid in version()
+// OR call directly by providing the id and vid in version()
 $version = MyInvois::documentType()->version(id: 1, vid: 2);
 ```
 
