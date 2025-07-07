@@ -8,6 +8,19 @@ use Illuminate\Support\Facades\DB;
 
 class AuthService extends BaseService
 {
+    public function beforeTokenRequest()
+    {
+        $payload = $this->getPayload();
+
+        $data = [
+            'client_id' => data_get($payload, 'client_id') ?? $this->myInvois->getClientId(),
+            'client_secret' => data_get($payload, 'client_secret') ?? $this->myInvois->getClientSecret(),
+            'grant_type' => data_get($payload, 'grant_type') ?? 'client_credentials',
+            'scope' => data_get($payload, 'scope') ?? 'InvoicingAPI',
+        ];
+
+        $this->setPayload($data);
+    }
 
     public function afterTokenResponse(MyinvoisRequest $request, array $result = []): void
     {

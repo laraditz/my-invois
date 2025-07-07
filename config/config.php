@@ -25,7 +25,7 @@ return [
         'document_type' => [
             'all' => '/api/v1.0/documenttypes',
             'get' => '/api/v1.0/documenttypes/{id}',
-            'versions' => '/api/v1.0/documenttypes/{id}/versions/{vid}',
+            'version' => '/api/v1.0/documenttypes/{id}/versions/{vid}',
         ],
         'notification' => [
             'all' => '/api/v1.0/notifications/taxpayer',
