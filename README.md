@@ -4,6 +4,9 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 ![GitHub Actions](https://github.com/laraditz/my-invois/actions/workflows/main.yml/badge.svg)
 
+> [!WARNING]  
+> This SDK is still actively under development. Use at your own risk.
+
 Laravel package for interacting with MyInvois (e-Invoice) API.
 
 ## Installation
