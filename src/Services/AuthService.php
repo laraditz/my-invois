@@ -11,6 +11,11 @@ class AuthService extends BaseService
     public function beforeTokenRequest()
     {
         $payload = $this->getPayload();
+        $onbehalfof = data_get($payload, 'onbehalfof');
+
+        if ($onbehalfof) {
+            $this->addHeaders(['onbehalfof' => $onbehalfof]);
+        }
 
         $data = [
             'client_id' => data_get($payload, 'client_id') ?? $this->myInvois->getClientId(),
@@ -25,10 +30,12 @@ class AuthService extends BaseService
     public function afterTokenResponse(MyinvoisRequest $request, array $result = []): void
     {
         DB::transaction(function () use ($request, $result) {
+            $requestHeaders = $this->getHeaders();
             $access_token = data_get($result, 'access_token');
             $expires_in = data_get($result, 'expires_in') ?? 0;
             $token_type = data_get($result, 'token_type');
             $scope = data_get($result, 'scope');
+            $onbehalfof = data_get($requestHeaders, 'onbehalfof');
 
             $client = MyinvoisClient::where('id', $this->myInvois->getClientId())->first();
 
@@ -44,7 +51,8 @@ class AuthService extends BaseService
                     'access_token' => $access_token,
                     'expires_at' => now()->addSeconds($expires_in),
                     'type' => $token_type,
-                    'scopes' => $scope
+                    'scopes' => $scope,
+                    'on_behalf_of' => $onbehalfof
                 ]);
             }
         });

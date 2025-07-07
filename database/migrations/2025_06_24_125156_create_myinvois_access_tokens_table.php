@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->datetime('expires_at')->nullable();
             $table->string('type', 20)->nullable();
             $table->text('scopes')->nullable();
+            $table->string('on_behalf_of', 50)->nullable();
             $table->timestamps();
 
             $table->index('client_id');

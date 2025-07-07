@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MyinvoisAccessToken extends Model
 {
-    protected $fillable = ['client_id', 'access_token', 'expires_at', 'type', 'scopes'];
+    protected $fillable = ['client_id', 'access_token', 'expires_at', 'type', 'scopes', 'on_behalf_of'];
 
     protected function casts(): array
     {
