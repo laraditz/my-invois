@@ -28,6 +28,8 @@ class BaseService
 
     protected array $removeParams = [];
 
+    protected array $headers = [];
+
     public function __construct(
         public MyInvois $myInvois,
         private ?string $route = '',
@@ -36,12 +38,7 @@ class BaseService
         private ?array $payload = [], // for body payload
         private null|array|string|int $params = null, // for path variables
     ) {
-
-        if ($this instanceof AuthService) {
-            $this->client = Http::asForm();
-        } else {
-            $this->client = Http::withHeaders($this->getHeaders());
-        }
+        $this->setHeaders($this->getDefaultHeaders());
     }
 
     public function __call($methodName, $arguments)
@@ -54,7 +51,7 @@ class BaseService
 
         // if method exists, return
         if (method_exists($this, $methodName)) {
-            return $this->$methodName($arguments);
+            return $this->$methodName(...$arguments);
         }
 
 
@@ -63,6 +60,8 @@ class BaseService
             if (count($arguments) > 0) {
                 $this->setPayload($arguments);
             }
+
+            $this->client = $this->getClient();
 
             return $this->execute();
         }
@@ -164,6 +163,26 @@ class BaseService
     }
 
     public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    protected function setHeaders(array $headers): void
+    {
+        $this->headers = $headers;
+    }
+
+    protected function addHeaders(array $headers): self
+    {
+        $this->headers = [
+            ...$this->getHeaders(),
+            ...$headers
+        ];
+
+        return $this;
+    }
+
+    public function getDefaultHeaders(): array
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -397,5 +416,14 @@ class BaseService
     protected function getParams(): null|array|string|int
     {
         return $this->params;
+    }
+
+    private function getClient()
+    {
+        if ($this instanceof AuthService) {
+            return Http::asForm();
+        } else {
+            return Http::withHeaders($this->getHeaders());
+        }
     }
 }
