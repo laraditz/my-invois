@@ -78,37 +78,37 @@ echo "Connection successful!";
 
 Below are all methods available under this SDK. Refer to [Platform API](https://sdk.myinvois.hasil.gov.my/api/) and [E-Invoice API](https://sdk.myinvois.hasil.gov.my/einvoicingapi/) for more information.
 
-### Authentication Service
+### Authentication Service `auth()`
 
-| Method            | Description                        | Parameters                                          | Return Type |
-| ----------------- | ---------------------------------- | --------------------------------------------------- | ----------- |
-| `auth()->token()` | Generate access token for API call | `client_id`, `client_secret`, `grant_type`, `scope` | `array`     |
+| Method    | Description                        | Parameters                                          | Return Type |
+| --------- | ---------------------------------- | --------------------------------------------------- | ----------- |
+| `token()` | Generate access token for API call | `client_id`, `client_secret`, `grant_type`, `scope` | `array`     |
 
-### Document Type Service
+### Document Type Service `documentType()`
 
-| Method                      | Description                    | Parameters  | Return Type |
-| --------------------------- | ------------------------------ | ----------- | ----------- |
-| `documentType()->all()`     | Get list of all document types | -           | `array`     |
-| `documentType()->get()`     | Get document type by ID        | `id`        | `array`     |
-| `documentType()->version()` | Get document type version      | `id`, `vid` | `array`     |
+| Method      | Description                    | Parameters  | Return Type |
+| ----------- | ------------------------------ | ----------- | ----------- |
+| `all()`     | Get list of all document types | -           | `array`     |
+| `get()`     | Get document type by ID        | `id`        | `array`     |
+| `version()` | Get document type version      | `id`, `vid` | `array`     |
 
-### Document Service
+### Document Service `document()`
 
-| Method                 | Description                         | Parameters              | Return Type |
-| ---------------------- | ----------------------------------- | ----------------------- | ----------- |
-| `document()->submit()` | Submit one or more signed documents | `documents[]`, `format` | `array`     |
+| Method     | Description                         | Parameters              | Return Type |
+| ---------- | ----------------------------------- | ----------------------- | ----------- |
+| `submit()` | Submit one or more signed documents | `documents[]`, `format` | `array`     |
 
-### Notification Service
+### Notification Service `notification()`
 
-| Method                  | Description                        | Parameters | Return Type |
-| ----------------------- | ---------------------------------- | ---------- | ----------- |
-| `notification()->all()` | Get all notifications for taxpayer | -          | `array`     |
+| Method  | Description                        | Parameters | Return Type |
+| ------- | ---------------------------------- | ---------- | ----------- |
+| `all()` | Get all notifications for taxpayer | -          | `array`     |
 
-### Taxpayer Service
+### Taxpayer Service `taxpayer()`
 
-| Method                   | Description                              | Parameters | Return Type |
-| ------------------------ | ---------------------------------------- | ---------- | ----------- |
-| `taxpayer()->validate()` | Validate TIN (Tax Identification Number) | `tin`      | `array`     |
+| Method       | Description                              | Parameters | Return Type |
+| ------------ | ---------------------------------------- | ---------- | ----------- |
+| `validate()` | Validate TIN (Tax Identification Number) | `tin`      | `array`     |
 
 ### Document Generation Methods
 
