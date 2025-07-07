@@ -623,7 +623,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 If you encounter issues or have questions:
 
-1. **Documentation**: Refer to official MyInvois documentation
+1. **Documentation**: Refer to official [MyInvois documentation](https://sdk.myinvois.hasil.gov.my/)
 2. **Issues**: Open an issue on GitHub repository
 3. **Email**: Send email to raditzfarhan@gmail.com
 
