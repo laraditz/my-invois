@@ -7,7 +7,7 @@
 Laravel package for interacting with MyInvois (e-Invoice) API.
 
 > [!WARNING]  
-> This SDK is still actively under development. Use at your own risk.
+> This SDK is still actively under development and may contain bugs. Use at your own risk.
 
 ## Installation
 
