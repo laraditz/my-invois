@@ -605,21 +605,6 @@ try {
 }
 ```
 
-### Logging
-
-This package will automatically log all requests and responses. You can configure logging in `config/logging.php`:
-
-```php
-'channels' => [
-    'myinvois' => [
-        'driver' => 'daily',
-        'path' => storage_path('logs/myinvois.log'),
-        'level' => env('LOG_LEVEL', 'debug'),
-        'days' => 14,
-    ],
-],
-```
-
 ### Testing
 
 ```bash
