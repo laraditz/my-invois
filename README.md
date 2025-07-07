@@ -137,6 +137,9 @@ $accessToken = MyInvois::auth()->token(
     grant_type: 'client_credentials',
     scope: 'InvoicingAPI'
 );
+
+// Get access token on behalf of
+$accessToken = MyInvois::auth()->token(onbehalfof: 'C25845632020');
 ```
 
 ### Document Types
