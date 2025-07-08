@@ -4,7 +4,11 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 [![License](https://poser.pugx.org/laraditz/my-invois/license?format=flat-square)](./LICENSE.md)
 
-Laravel SDK for interacting with MyInvois (e-Invoice) API. MyInvois is the solution of the Lembaga Hasil Dalam Negeri Malaysia (LHDNM) used by taxpayers to submit their issued documents with the Tax Authority, get notified on events related to document issuance.
+### A Developer-Friendly Laravel SDK for MyInvois e-Invoicing
+
+Easily integrate with **MyInvois**, the official e-Invoicing platform by **Lembaga Hasil Dalam Negeri Malaysia (LHDNM)**, using this powerful Laravel SDK. MyInvois enables taxpayers to seamlessly submit issued documents to the tax authority and receive real-time updates on document statuses.
+
+This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices—helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
 
 > [!WARNING]  
 > This SDK is still actively under development and may contain bugs. Use at your own risk.
