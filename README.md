@@ -1,5 +1,3 @@
-![Laravel x MyInvois](./assets/cover.png)
-
 # Laravel x MyInvois
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
@@ -11,12 +9,14 @@ Laravel SDK for interacting with MyInvois (e-Invoice) API. MyInvois is the solut
 > [!WARNING]  
 > This SDK is still actively under development and may contain bugs. Use at your own risk.
 
+<a href="https://www.buymeacoffee.com/raditzfarhan" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 200px !important;" ></a>
+
 ## Installation
 
 ### Requirements
 
-- PHP >= 8.1
-- Laravel >= 9.0
+- PHP >= 8.2
+- Laravel >= 11.0
 - Composer
 
 ## Quick Start
