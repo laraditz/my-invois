@@ -199,7 +199,7 @@ $result = MyInvois::document()->submit([
 use Laraditz\MyInvois\Facades\MyInvois;
 
 // Validate TIN
-$validation = MyInvois::taxpayer()->params(['tin' => '123456789012'])->validate();
+$validation = MyInvois::taxpayer()->validate(tin: 'AB123456789012', idType: 'NRIC', idValue: '200101011234');
 ```
 
 ### Notification Retrieval
