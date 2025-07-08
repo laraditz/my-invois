@@ -4,7 +4,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
-![GitHub Actions](https://github.com/laraditz/my-invois/actions/workflows/main.yml/badge.svg)
+[![License](https://poser.pugx.org/laraditz/my-invois/license?format=flat-square)](./LICENSE.md)
 
 Laravel SDK for interacting with MyInvois (e-Invoice) API. MyInvois is the solution of the Lembaga Hasil Dalam Negeri Malaysia (LHDNM) used by taxpayers to submit their issued documents with the Tax Authority, get notified on events related to document issuance.
 
