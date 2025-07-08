@@ -1,4 +1,4 @@
-![Laravel x MyInvois](./cover.png)
+![Laravel x MyInvois](./assets/cover.png)
 
 # Laravel x MyInvois
 
