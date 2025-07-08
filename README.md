@@ -91,41 +91,40 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Authentication Service `auth()`
 
-| Method    | Description                        | Parameters                                          | Return Type |
-| --------- | ---------------------------------- | --------------------------------------------------- | ----------- |
-| `token()` | Generate access token for API call | `client_id`, `client_secret`, `grant_type`, `scope` | `array`     |
+| Method    | Description                        | Parameters                                                        |
+| --------- | ---------------------------------- | ----------------------------------------------------------------- |
+| `token()` | Generate access token for API call | `client_id`, `client_secret`, `grant_type`, `scope`, `onbehalfof` |
 
 ### Document Type Service `documentType()`
 
-| Method      | Description                    | Parameters  | Return Type |
-| ----------- | ------------------------------ | ----------- | ----------- |
-| `all()`     | Get list of all document types | -           | `array`     |
-| `get()`     | Get document type by ID        | `id`        | `array`     |
-| `version()` | Get document type version      | `id`, `vid` | `array`     |
+| Method      | Description                    | Parameters  |
+| ----------- | ------------------------------ | ----------- |
+| `all()`     | Get list of all document types | -           |
+| `get()`     | Get document type by ID        | `id`        |
+| `version()` | Get document type version      | `id`, `vid` |
 
 ### Document Service `document()`
 
-| Method     | Description                         | Parameters              | Return Type |
-| ---------- | ----------------------------------- | ----------------------- | ----------- |
-| `submit()` | Submit one or more signed documents | `documents[]`, `format` | `array`     |
+| Method     | Description                         | Parameters              |
+| ---------- | ----------------------------------- | ----------------------- |
+| `submit()` | Submit one or more signed documents | `documents[]`, `format` |
 
 ### Notification Service `notification()`
 
-| Method  | Description                        | Parameters | Return Type |
-| ------- | ---------------------------------- | ---------- | ----------- |
-| `all()` | Get all notifications for taxpayer | -          | `array`     |
+| Method  | Description                        | Parameters |
+| ------- | ---------------------------------- | ---------- |
+| `all()` | Get all notifications for taxpayer | -          |
 
 ### Taxpayer Service `taxpayer()`
 
-| Method       | Description                              | Parameters                 | Return Type |
-| ------------ | ---------------------------------------- | -------------------------- | ----------- |
-| `validate()` | Validate TIN (Tax Identification Number) | `tin`, `idType`, `idValue` | `array`     |
+| Method       | Description                              | Parameters                 |
+| ------------ | ---------------------------------------- | -------------------------- |
+| `validate()` | Validate TIN (Tax Identification Number) | `tin`, `idType`, `idValue` |
 
 ### Document Generation Methods
 
-| Method               | Description                             | Parameters                        | Return Type |
-| -------------------- | --------------------------------------- | --------------------------------- | ----------- |
-| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
+| Method | Description | Parameters |
+| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` |
 
 ## Usage
 
@@ -158,13 +157,9 @@ use Laraditz\MyInvois\Facades\MyInvois;
 $documentTypes = MyInvois::documentType()->all();
 
 // Get document type by ID
-$documentType = MyInvois::documentType()->params(['id' => 1])->get();
-// OR call directly by providing the id in get()
 $documentType = MyInvois::documentType()->get(1);
 
 // Get document type version
-$version = MyInvois::documentType()->params(['id' => 1, 'vid' => 2])->version();
-// OR call directly by providing the id and vid in version()
 $version = MyInvois::documentType()->version(id: 1, vid: 2);
 ```
 
@@ -238,7 +233,7 @@ $xmlDocument = MyInvois::generateDocument($invoice, Format::XML);
 
 ### Advanced Usage with Query String, Payload and Params
 
-The service provides a flexible methods to be able to set parameters on the fly before the HTTP request is made. You can set the `payload` (body), `queryString` and `params` (URL path) after calling the service method.
+The service provides a flexible methods to be able to set parameters on the fly before the HTTP request is made. You can set using the chaining methods `payload` (body), `queryString` and `params` (URL path) after calling the service method.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
@@ -247,6 +242,11 @@ use Laraditz\MyInvois\Facades\MyInvois;
 $result = MyInvois::documentType()
     ->queryString(['page' => 1, 'limit' => 10])
     ->all();
+
+// Using params
+$result = MyInvois::documentType()
+    ->params(['id' => 1, 'vid' => 2])
+    ->version();
 ```
 
 ### Error Handling
@@ -505,6 +505,20 @@ This package supports UBL (Universal Business Language) data structures for e-in
 
 This package provides several models for tracking and management:
 
+#### MyinvoisAccessToken
+
+Model for managing access tokens:
+
+```php
+use Laraditz\MyInvois\Models\MyinvoisAccessToken;
+
+// Get valid token
+$validToken = MyinvoisAccessToken::hasNotExpired()->first();
+
+// Get token by client
+$clientToken = MyinvoisAccessToken::where('client_id', $clientId)->first();
+```
+
 #### MyinvoisRequest
 
 Model for storing all API requests and responses:
@@ -515,7 +529,7 @@ use Laraditz\MyInvois\Models\MyinvoisRequest;
 // Get all requests
 $requests = MyinvoisRequest::all();
 
-// Get requests by action
+// Get requests by action (service name and method)
 $documentRequests = MyinvoisRequest::where('action', 'DocumentService::submit')->get();
 
 // Get successful requests
@@ -537,20 +551,6 @@ $documents = MyinvoisDocument::where('request_id', $requestId)->get();
 
 // Get documents by format
 $xmlDocuments = MyinvoisDocument::where('format', 'xml')->get();
-```
-
-#### MyinvoisAccessToken
-
-Model for managing access tokens:
-
-```php
-use Laraditz\MyInvois\Models\MyinvoisAccessToken;
-
-// Get valid token
-$validToken = MyinvoisAccessToken::hasNotExpired()->first();
-
-// Get token by client
-$clientToken = MyinvoisAccessToken::where('client_id', $clientId)->first();
 ```
 
 ### Migration Files
