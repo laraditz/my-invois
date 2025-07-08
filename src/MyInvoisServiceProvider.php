@@ -2,6 +2,8 @@
 
 namespace Laraditz\MyInvois;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class MyInvoisServiceProvider extends ServiceProvider
@@ -16,13 +18,19 @@ class MyInvoisServiceProvider extends ServiceProvider
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'my-invois');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'my-invois');
-        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        // $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('my-invois.php'),
+                __DIR__ . '/../config/config.php' => config_path('myinvois.php'),
             ], 'config');
+
+            $this->publishMigrations();
+
+            // $this->publishesMigrations([
+            //     __DIR__ . '/../database/migrations' => database_path('migrations'),
+            // ], 'migrations');
 
             // Publishing the views.
             /*$this->publishes([
@@ -50,11 +58,68 @@ class MyInvoisServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'my-invois');
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'myinvois');
 
         // Register the main class to use with the facade
-        $this->app->singleton('my-invois', function () {
-            return new MyInvois;
+        $this->app->singleton('myinvois', function () {
+            return new MyInvois(
+                client_id: config('myinvois.client_id'),
+                client_secret: config('myinvois.client_secret'),
+                is_sandbox: config('myinvois.sandbox.mode'),
+                certificate_path: config('myinvois.certificate_path'),
+                private_key_path: config('myinvois.private_key_path'),
+                passphrase: config('myinvois.passphrase'),
+                disk: config('myinvois.disk'),
+                document_path: config('myinvois.document_path'),
+            );
         });
+
+        $this->app->singleton('myinvoishelper', function () {
+            return new MyInvoisHelper();
+        });
+    }
+
+    protected function registerRoutes()
+    {
+        Route::group($this->routeConfiguration(), function () {
+            Route::name('tiktok.')->group(function () {
+                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            });
+        });
+    }
+
+    protected function routeConfiguration()
+    {
+        return [
+            'prefix' => config('myionvois.routes.prefix'),
+            'middleware' => config('myionvois.middleware'),
+        ];
+    }
+
+    protected function publishMigrations()
+    {
+        $databasePath = __DIR__ . '/../database/migrations/';
+        $migrationPath = database_path('migrations/');
+
+        $files = array_diff(scandir($databasePath), array('.', '..'));
+        $date = date('Y_m_d');
+        $timestamp = date('His');
+
+        $migrationFiles = collect($files)
+            ->mapWithKeys(function (string $file) use ($databasePath, $migrationPath, $date, &$timestamp) {
+                $filename = Str::replace(Str::substr($file, 0, 17), '', $file);
+
+                $found = glob($migrationPath . '*' . $filename);
+                $timestamp = date("His", strtotime($timestamp) + 1); // ensure in order
+    
+                return !!count($found) === true ? []
+                    : [
+                        $databasePath . $file => $migrationPath . $date . '_' . $timestamp . $filename,
+                    ];
+            });
+
+        if ($migrationFiles->isNotEmpty()) {
+            $this->publishes($migrationFiles->toArray(), 'migrations');
+        }
     }
 }

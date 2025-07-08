@@ -4,10 +4,13 @@
   "keywords": [
     "laraditz",
     "laravel",
+    "SDK",
     "my-invois",
     "MyInvois",
     "LHDN",
-    "Hasil"
+    "LHDNM",
+    "Hasil",
+    "Lembaga Hasil Dalam Negeri Malaysia"
   ],
   "homepage": "https://github.com/laraditz/my-invois",
   "license": "MIT",
@@ -21,10 +24,11 @@
   ],
   "require": {
     "php": "^8.2",
-    "illuminate/support": "^11.0|^12.0"
+    "illuminate/support": "^11.0|^12.0",
+    "sabre/xml": "^4.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^10.0",
+    "orchestra/testbench": "^9.0|^10.0",
     "phpunit/phpunit": "^11.0"
   },
   "autoload": {
@@ -50,7 +54,8 @@
         "Laraditz\\MyInvois\\MyInvoisServiceProvider"
       ],
       "aliases": {
-        "MyInvois": "Laraditz\\MyInvois\\MyInvoisFacade"
+        "MyInvois": "Laraditz\\MyInvois\\Facades\\MyInvois",
+        "MyInvoisHelper": "Laraditz\\MyInvois\\Facades\\MyInvoisHelper"
       }
     }
   }
