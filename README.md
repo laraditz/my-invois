@@ -1,22 +1,26 @@
-![Laravel x MyInvois](./assets/cover.png)
-
 # Laravel x MyInvois
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
-![GitHub Actions](https://github.com/laraditz/my-invois/actions/workflows/main.yml/badge.svg)
+[![License](https://poser.pugx.org/laraditz/my-invois/license?format=flat-square)](./LICENSE.md)
 
-Laravel SDK for interacting with MyInvois (e-Invoice) API. MyInvois is the solution of the Lembaga Hasil Dalam Negeri Malaysia (LHDNM) used by taxpayers to submit their issued documents with the Tax Authority, get notified on events related to document issuance.
+### A Developer-Friendly Laravel SDK for MyInvois e-Invoicing
+
+Easily integrate with **MyInvois**, the official e-Invoicing platform by **Lembaga Hasil Dalam Negeri Malaysia (LHDNM)**, using this powerful Laravel SDK. MyInvois enables taxpayers to seamlessly submit issued documents to the tax authority and receive real-time updates on document statuses.
+
+This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices—helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
 
 > [!WARNING]  
 > This SDK is still actively under development and may contain bugs. Use at your own risk.
+
+<a href="https://www.buymeacoffee.com/raditzfarhan" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 200px !important;" ></a>
 
 ## Installation
 
 ### Requirements
 
-- PHP >= 8.1
-- Laravel >= 9.0
+- PHP >= 8.2
+- Laravel >= 11.0
 - Composer
 
 ## Quick Start
@@ -236,7 +240,7 @@ $xmlDocument = MyInvois::generateDocument($invoice, Format::XML);
 
 ### Advanced Usage with Query String, Payload and Params
 
-The service provides a flexible methods to be able to set parameters on the fly before the HTTP request is made. You can set using the chaining methods `payload` (body), `queryString` and `params` (URL path) after calling the service method.
+The service offers a flexible, fluent interface that lets you dynamically configure parameters on the fly—**right before the HTTP request is sent**. Effortlessly chain methods like `payload()` for the request body, `queryString()` for URL queries, and `params()` for path parameters, all after invoking the service method.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
