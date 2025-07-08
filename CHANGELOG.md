@@ -2,6 +2,16 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.1 - 2025-07-08
+
+### Added
+
+- Add `FUNDING.yml`.
+
+### Changed
+
+- Update `README.md`.
+
 ## 0.0.0 - 2025-07-08
 
 - initial release
