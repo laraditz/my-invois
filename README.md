@@ -57,7 +57,15 @@ You can publish the config file via this command:
 php artisan vendor:publish --provider="Laraditz\MyInvois\MyInvoisServiceProvider" --tag="config"
 ```
 
-### 4. Run Migration
+### 4. Publish Migration
+
+You can publish the migration file via this command:
+
+```bash
+php artisan vendor:publish --provider="Laraditz\MyInvois\MyInvoisServiceProvider" --tag="migrations"
+```
+
+### 5. Run Migration
 
 Run the migration command to create the necessary database tables:
 
@@ -65,7 +73,7 @@ Run the migration command to create the necessary database tables:
 php artisan migrate
 ```
 
-### 5. Test Connection
+### 6. Test Connection
 
 Test your setup with a simple authentication call:
 

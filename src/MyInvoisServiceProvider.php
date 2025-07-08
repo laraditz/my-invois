@@ -2,6 +2,7 @@
 
 namespace Laraditz\MyInvois;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,13 +18,19 @@ class MyInvoisServiceProvider extends ServiceProvider
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'my-invois');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'my-invois');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         // $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/config.php' => config_path('myinvois.php'),
             ], 'config');
+
+            $this->publishMigrations();
+
+            // $this->publishesMigrations([
+            //     __DIR__ . '/../database/migrations' => database_path('migrations'),
+            // ], 'migrations');
 
             // Publishing the views.
             /*$this->publishes([
@@ -87,5 +94,32 @@ class MyInvoisServiceProvider extends ServiceProvider
             'prefix' => config('myionvois.routes.prefix'),
             'middleware' => config('myionvois.middleware'),
         ];
+    }
+
+    protected function publishMigrations()
+    {
+        $databasePath = __DIR__ . '/../database/migrations/';
+        $migrationPath = database_path('migrations/');
+
+        $files = array_diff(scandir($databasePath), array('.', '..'));
+        $date = date('Y_m_d');
+        $timestamp = date('His');
+
+        $migrationFiles = collect($files)
+            ->mapWithKeys(function (string $file) use ($databasePath, $migrationPath, $date, &$timestamp) {
+                $filename = Str::replace(Str::substr($file, 0, 17), '', $file);
+
+                $found = glob($migrationPath . '*' . $filename);
+                $timestamp = date("His", strtotime($timestamp) + 1); // ensure in order
+    
+                return !!count($found) === true ? []
+                    : [
+                        $databasePath . $file => $migrationPath . $date . '_' . $timestamp . $filename,
+                    ];
+            });
+
+        if ($migrationFiles->isNotEmpty()) {
+            $this->publishes($migrationFiles->toArray(), 'migrations');
+        }
     }
 }
