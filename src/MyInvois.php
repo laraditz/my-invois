@@ -58,7 +58,7 @@ class MyInvois
         }
     }
 
-    public function generateDocument(Invoice $data, Format $format)
+    public function generateDocument(Invoice $data, Format $format): string
     {
         return match ($format) {
             Format::XML => $this->generateXMLDocument(data: $data),
@@ -66,7 +66,7 @@ class MyInvois
         };
     }
 
-    public function generateXMLDocument(Invoice $data)
+    public function generateXMLDocument(Invoice $data): string
     {
         $hasSignature = false;
         $helper = new MyInvoisHelper();

@@ -123,9 +123,9 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Document Generation Methods
 
-| Method               | Description                             | Parameters                        |
-| -------------------- | --------------------------------------- | --------------------------------- |
-| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` |
+| Method               | Description                             | Parameters                        | Return type |
+| -------------------- | --------------------------------------- | --------------------------------- | ----------- |
+| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
 
 ## Usage
 
