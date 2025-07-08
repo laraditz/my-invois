@@ -1,3 +1,5 @@
+![Laravel x MyInvois](./cover.png)
+
 # Laravel x MyInvois
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
