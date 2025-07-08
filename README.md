@@ -117,16 +117,15 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Taxpayer Service `taxpayer()`
 
-| Method       | Description                              | Parameters | Return Type |
-| ------------ | ---------------------------------------- | ---------- | ----------- |
-| `validate()` | Validate TIN (Tax Identification Number) | `tin`      | `array`     |
+| Method       | Description                              | Parameters                 | Return Type |
+| ------------ | ---------------------------------------- | -------------------------- | ----------- |
+| `validate()` | Validate TIN (Tax Identification Number) | `tin`, `idType`, `idValue` | `array`     |
 
 ### Document Generation Methods
 
-| Method                  | Description                                         | Parameters                        | Return Type |
-| ----------------------- | --------------------------------------------------- | --------------------------------- | ----------- |
-| `generateDocument()`    | Generate document in XML or JSON format             | `Invoice $data`, `Format $format` | `string`    |
-| `generateXMLDocument()` | Generate XML document with signature (if available) | `Invoice $data`                   | `string`    |
+| Method               | Description                             | Parameters                        | Return Type |
+| -------------------- | --------------------------------------- | --------------------------------- | ----------- |
+| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
 
 ## Usage
 
@@ -187,10 +186,10 @@ $invoice = new Invoice(
 );
 
 // Submit document
-$result = MyInvois::document()->submit([
-    'documents' => [$invoice], // can submit multiple invoices
-    'format' => Format::XML
-]);
+$result = MyInvois::document()->submit(
+    documents: [$invoice], // can submit multiple invoices
+    format: Format::XML
+);
 ```
 
 ### Taxpayer Validation
@@ -213,6 +212,8 @@ $notifications = MyInvois::notification()->all();
 
 ### Document Generation
 
+Typically you won't need to generate the document as you will be using the Document Submission service. But if you want to manually generate the document for debugging or other purposes, you able to do so using below code.
+
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
 use Laraditz\MyInvois\Data\Invoice;
@@ -231,11 +232,13 @@ $invoice = new Invoice(
 // Generate XML document
 $xmlDocument = MyInvois::generateDocument($invoice, Format::XML);
 
-// Or directly
-$xmlDocument = MyInvois::generateXMLDocument($invoice);
+// Then, to display the xml on browser
+// MyInvois::helper()->displayXml($xmlDocument);
 ```
 
-### Advanced Usage with Query String and Payload
+### Advanced Usage with Query String, Payload and Params
+
+The service provides a flexible methods to be able to set parameters on the fly before the HTTP request is made. You can set the `payload` (body), `queryString` and `params` (URL path) after calling the service method.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
@@ -244,14 +247,6 @@ use Laraditz\MyInvois\Facades\MyInvois;
 $result = MyInvois::documentType()
     ->queryString(['page' => 1, 'limit' => 10])
     ->all();
-
-// Using payload
-$result = MyInvois::document()
-    ->payload([
-        'documents' => [$invoice],
-        'format' => Format::XML
-    ])
-    ->submit();
 ```
 
 ### Error Handling
@@ -261,10 +256,10 @@ use Laraditz\MyInvois\Facades\MyInvois;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
 
 try {
-    $result = MyInvois::document()->submit([
-        'documents' => [$invoice],
-        'format' => Format::XML
-    ]);
+    $result = MyInvois::document()->submit(
+        documents: [$invoice],
+        format: Format::XML
+    );
 
     if ($result['success']) {
         echo "Document submitted successfully. Request ID: " . $result['request_id'];
@@ -300,22 +295,6 @@ MYINVOIS_PASSPHRASE="your_passphrase"
 
 // Package will automatically add signature if certificate exists
 $xmlDocument = MyInvois::generateXMLDocument($invoice);
-```
-
-### Database Tracking
-
-This package will store all requests and responses in the database for tracking:
-
-```php
-// Get request history
-use Laraditz\MyInvois\Models\MyinvoisRequest;
-
-$requests = MyinvoisRequest::where('action', 'DocumentService::submit')->get();
-
-// Get submitted documents
-use Laraditz\MyInvois\Models\MyinvoisDocument;
-
-$documents = MyinvoisDocument::where('request_id', $requestId)->get();
 ```
 
 ### Complete Example: Creating and Submitting Invoice
@@ -449,8 +428,8 @@ $invoice = new Invoice(
 // Submit invoice
 try {
     $result = MyInvois::document()->submit([
-        'documents' => [$invoice],
-        'format' => Format::XML
+        documents: [$invoice],
+        format: Format::XML
     ]);
 
     if ($result['success']) {
@@ -582,6 +561,7 @@ This package will create the following tables when migration is run:
 - `myinvois_access_tokens` - Store access tokens
 - `myinvois_requests` - Store all requests and responses
 - `myinvois_documents` - Store submitted documents
+- `myinvois_document_histories` - Store previously submitted documents
 
 ### Exception Handling
 

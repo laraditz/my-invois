@@ -176,6 +176,11 @@ class MyInvois
         return false;
     }
 
+    public function helper(): MyInvoisHelper
+    {
+        return new MyInvoisHelper;
+    }
+
     public function __call($method, $arguments)
     {
         throw_if(!$this->getClientId(), LogicException::class, __('Missing Client ID.'));
