@@ -240,7 +240,7 @@ $xmlDocument = MyInvois::generateDocument($invoice, Format::XML);
 
 ### Advanced Usage with Query String, Payload and Params
 
-The service offers a flexible, fluent interface that lets you dynamically configure parameters on the fly—right before the HTTP request is sent. Effortlessly chain methods like `payload()` for the request body, `queryString()` for URL queries, and `params()` for path parameters, all after invoking the service method.
+The service offers a flexible, fluent interface that lets you dynamically configure parameters on the fly—**right before the HTTP request is sent**. Effortlessly chain methods like `payload()` for the request body, `queryString()` for URL queries, and `params()` for path parameters, all after invoking the service method.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
