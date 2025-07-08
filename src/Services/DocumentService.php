@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Laraditz\MyInvois\Models\MyinvoisRequest;
 use Laraditz\MyInvois\Models\MyinvoisDocument;
 use Laraditz\MyInvois\Exceptions\MyInvoisException;
+use Laraditz\MyInvois\Models\MyinvoisDocumentHistory;
 
 class DocumentService extends BaseService
 {
@@ -117,13 +118,8 @@ class DocumentService extends BaseService
                         ...$updateData
                     ]);
                 } else {
-
-                    // Remove existing file
-                    $storage = Storage::disk($myInvoisDocument->disk);
-
-                    if ($storage->exists($myInvoisDocument->file_path)) {
-                        $storage->delete($myInvoisDocument->file_path);
-                    }
+                    // Add to histories table before replacing
+                    $this->addHistory($myInvoisDocument);
 
                     $myInvoisDocument = tap($myInvoisDocument)->update($updateData);
                 }
@@ -182,6 +178,16 @@ class DocumentService extends BaseService
                 }
             }
         }
+    }
+
+    private function addHistory(MyinvoisDocument $myInvoisDocument): void
+    {
+        $attributes = [
+            ...$myInvoisDocument->replicate()->getAttributes(),
+            ...['error' => $myInvoisDocument->error] // need to reassign so that json in proper format when save
+        ];
+
+        MyinvoisDocumentHistory::create(attributes: $attributes);
     }
 
     private function displayXML(string $document)
