@@ -428,10 +428,10 @@ $invoice = new Invoice(
 
 // Submit invoice
 try {
-    $result = MyInvois::document()->submit([
+    $result = MyInvois::document()->submit(
         documents: [$invoice],
         format: Format::XML
-    ]);
+    );
 
     if ($result['success']) {
         echo "Invoice submitted successfully!";
