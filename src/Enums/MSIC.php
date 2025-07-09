@@ -2,6 +2,11 @@
 
 namespace Laraditz\MyInvois\Enums;
 
+/**
+ * Malaysia Standard Industrial Classification (MSIC) Codes
+ *
+ * @link https://sdk.myinvois.hasil.gov.my/codes/msic-codes/
+ */
 enum MSIC: string
 {
     // NOT APPLICABLE
