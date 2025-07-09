@@ -2,6 +2,12 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.2 - 2025-07-09
+
+### Added
+
+- Add `Classification`, `Country`, `Currency`, `MSIC`, `State`, `TaxType` and `MeasureUnit` enums.
+
 ## 0.0.1 - 2025-07-08
 
 ### Added
