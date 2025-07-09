@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
-[![License](https://poser.pugx.org/laraditz/my-invois/license?format=flat-square)](./LICENSE.md)
+[![License](https://img.shields.io/packagist/l/laraditz/my-invois.svg?style=flat-square)](./LICENSE.md)
 
 ### A Developer-Friendly Laravel SDK for MyInvois e-Invoicing
 
