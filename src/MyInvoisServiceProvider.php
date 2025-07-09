@@ -103,18 +103,18 @@ class MyInvoisServiceProvider extends ServiceProvider
 
         $files = array_diff(scandir($databasePath), array('.', '..'));
         $date = date('Y_m_d');
-        $timestamp = date('His');
+        $time = date('His');
 
         $migrationFiles = collect($files)
-            ->mapWithKeys(function (string $file) use ($databasePath, $migrationPath, $date, &$timestamp) {
+            ->mapWithKeys(function (string $file) use ($databasePath, $migrationPath, $date, &$time) {
                 $filename = Str::replace(Str::substr($file, 0, 17), '', $file);
 
                 $found = glob($migrationPath . '*' . $filename);
-                $timestamp = date("His", strtotime($timestamp) + 1); // ensure in order
+                $time = date("His", strtotime($time) + 1); // ensure in order
     
                 return !!count($found) === true ? []
                     : [
-                        $databasePath . $file => $migrationPath . $date . '_' . $timestamp . $filename,
+                        $databasePath . $file => $migrationPath . $date . '_' . $time . $filename,
                     ];
             });
 
