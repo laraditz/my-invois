@@ -564,6 +564,7 @@ try {
 - [ ] Add documentation
 - [ ] Add test
 - [ ] Refactor code
+- [ ] Convert some enum into DB table + seeder?
 
 ### Testing
 
