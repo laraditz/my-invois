@@ -508,7 +508,7 @@ This package supports UBL (Universal Business Language) data structures for e-in
 - Check internet connection
 - Try again after a few minutes
 
-### Migration Files
+### Database Tables
 
 This package will create the following tables when migration is run:
 
