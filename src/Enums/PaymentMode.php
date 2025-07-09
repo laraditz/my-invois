@@ -12,4 +12,12 @@ enum PaymentMode: string
     case EWallet = '06';
     case DigitalBank = '07';
     case Others = '08';
+
+    public function getDescription(): ?string
+    {
+        return match ($this) {
+            static::EWallet => 'e-Wallet / Digital Wallet',
+            default => str($this->name)->headline()->value,
+        };
+    }
 }
