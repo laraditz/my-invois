@@ -3,12 +3,10 @@
 namespace Laraditz\MyInvois;
 
 use DOMDocument;
-use Laraditz\MyInvois\Data\Invoice;
 use LogicException;
-use Sabre\Xml\Service;
 use BadMethodCallException;
 use Illuminate\Support\Str;
-use Laraditz\MyInvois\Enums\XMLNS;
+use Laraditz\MyInvois\Data\Invoice;
 use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Models\MyinvoisAccessToken;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
