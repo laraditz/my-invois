@@ -1357,7 +1357,7 @@ enum MeasureUnit: string
     case M80 = 'stokes per pascal';
     case M81 = 'square centimetre per second';
     case M82 = 'square metre per second pascal';
-    case M83 = 'denier';
+    case M83 = 'denier (duplicate?)';
     case M84 = 'pound per yard';
     case M85 = 'ton, assay';
     case M86 = 'pfund';
