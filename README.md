@@ -560,6 +560,7 @@ try {
 
 ### To Do
 
+- [ ] Add support for JSON document
 - [ ] Add all APIs
 - [ ] Add documentation
 - [ ] Add test
