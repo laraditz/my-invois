@@ -27,6 +27,7 @@ class MyInvois
         private ?string $disk = 'local',
         private ?string $document_path = null,
     ) {
+        $this->setCertificatePaths();
     }
 
     public function getAccessToken(): ?string
@@ -135,9 +136,19 @@ class MyInvois
         return $this->certificate_path;
     }
 
+    private function setCertificatePath(string $certificate_path)
+    {
+        $this->certificate_path = $certificate_path;
+    }
+
     public function getPrivateKeyPath(): ?string
     {
         return $this->private_key_path;
+    }
+
+    private function setPrivateKeyPath(string $private_key_path)
+    {
+        $this->private_key_path = $private_key_path;
     }
 
     public function getPassphrase(): ?string
@@ -177,6 +188,17 @@ class MyInvois
     public function helper(): MyInvoisHelper
     {
         return new MyInvoisHelper;
+    }
+
+    private function setCertificatePaths()
+    {
+        if ($this->certificate_path && !$this->helper()->isAbsolutePath($this->certificate_path)) {
+            $this->setCertificatePath(base_path($this->certificate_path));
+        }
+
+        if ($this->private_key_path && !$this->helper()->isAbsolutePath($this->private_key_path)) {
+            $this->setPrivateKeyPath(base_path($this->private_key_path));
+        }
     }
 
     public function __call($method, $arguments)

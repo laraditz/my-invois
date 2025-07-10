@@ -79,4 +79,10 @@ class MyInvoisHelper
 
         return $string;
     }
+
+    public function isAbsolutePath(string $path): bool
+    {
+        // Check if the path starts with a forward slash or a drive letter (Windows)
+        return preg_match('/^(\/|[a-zA-Z]:[\/\\\])/', $path) === 1;
+    }
 }

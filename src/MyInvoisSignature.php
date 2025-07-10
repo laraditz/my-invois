@@ -254,7 +254,7 @@ class MyInvoisSignature
 
         if ($ext === 'p12' || $ext === 'pfx') {
             if (!openssl_pkcs12_read($certContent, $certs, $this->passphrase)) {
-                throw new MyInvoisException('Invalid cetificate');
+                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
             }
 
             $certContent = data_get($certs, 'cert');
