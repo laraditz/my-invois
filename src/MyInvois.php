@@ -275,20 +275,4 @@ class MyInvois
             ));
         }
     }
-
-    // old code, will remove?
-    private function removeUnusedAttributes(DOMDocument $dom, string $tagName, array $excepts = [])
-    {
-        $extensionContent = $dom->getElementsByTagName($tagName);
-        $extensionContentAttrs = $extensionContent?->item(0)?->getAttributeNames();
-
-        if (is_array($extensionContentAttrs) && count($extensionContentAttrs) > 0) {
-            foreach ($extensionContentAttrs as $extensionContentAttr) {
-                if (!in_array($extensionContentAttr, $excepts)) {
-                    $extensionContent->item(0)->removeAttribute($extensionContentAttr);
-                }
-
-            }
-        }
-    }
 }
