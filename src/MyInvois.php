@@ -18,7 +18,7 @@ class MyInvois
 
     private $hashAlgorithm = 'sha256';
 
-    private bool $hasSignature = true;
+    private bool $hasSignature = false;
 
     private ?MyInvoisCertificate $certificate = null;
 
@@ -104,19 +104,6 @@ class MyInvois
         $this->hasSignature = $hasSignature;
 
         return $this;
-    }
-
-    private function createDOM(
-        string $version = '1.0',
-        string $encoding = 'UTF-8',
-        bool $preserveWhiteSpace = false,
-        bool $formatOutput = false
-    ): DOMDocument {
-        $dom = new DOMDocument($version, encoding: $encoding);
-        $dom->preserveWhiteSpace = $preserveWhiteSpace;
-        $dom->formatOutput = $formatOutput;
-
-        return $dom;
     }
 
     public function getClientId(): string
@@ -241,6 +228,19 @@ class MyInvois
             $this->setCertificate();
             $this->hasSignature = true;
         }
+    }
+
+    private function createDOM(
+        string $version = '1.0',
+        string $encoding = 'UTF-8',
+        bool $preserveWhiteSpace = false,
+        bool $formatOutput = false
+    ): DOMDocument {
+        $dom = new DOMDocument($version, encoding: $encoding);
+        $dom->preserveWhiteSpace = $preserveWhiteSpace;
+        $dom->formatOutput = $formatOutput;
+
+        return $dom;
     }
 
     public function __call($method, $arguments)
