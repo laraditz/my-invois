@@ -37,16 +37,11 @@ class MyInvoisSignature
 
     private Signature $signature;
 
-    private ?MyInvoisCertificate $certificate = null;
-
     private ?MyInvoisHelper $helper = null;
-
 
     private $hashAlgorithm = 'sha256';
 
     private $signAlgorithm = OPENSSL_ALGO_SHA256;
-
-    public bool $hasSignature = false;
 
     private ?string $docDigest = null;
 
@@ -64,20 +59,15 @@ class MyInvoisSignature
 
     public function __construct(
         public Invoice $document,
-        public ?string $certificatePath = null,
-        public ?string $privateKeyPath = null,
-        public ?string $passphrase = null,
+        private MyInvoisCertificate $certificate,
     ) {
         $this->helper = new MyInvoisHelper();
-        $this->checkCertFiles();
         $this->prepare();
         $this->build(); // Step 8
     }
 
     private function prepare()
     {
-        $this->certificate = $this->getCertData(); // MyInvoisCertificate       
-
         // Step 2: Apply transformations to the document
         $service = $this->helper->createInvoiceXMLService();
         $xml = $this->helper->writeXml($service, 'Invoice', $this->document->toXmlArray());
@@ -279,25 +269,6 @@ class MyInvoisSignature
         openssl_sign($content, $signature, $privateKey, $this->signAlgorithm);
 
         return $signature;
-    }
-
-    private function checkCertFiles()
-    {
-        if (!$this->isFileExists($this->certificatePath)) {
-            $this->certificatePath = null;
-        }
-
-        if (!$this->isFileExists($this->privateKeyPath)) {
-            $this->privateKeyPath = null;
-        }
-
-        if ($this->certificatePath && $this->privateKeyPath) {
-            $this->hasSignature = true;
-        }
-
-        if ($this->hasSignature === false) {
-            throw new MyInvoisException(__('Missing certificate and private key'));
-        }
     }
 
     public function setUBLExtensions(UBLExtensions $UBLExtensions): void

@@ -10,12 +10,17 @@ use Laraditz\MyInvois\Data\Invoice;
 use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Models\MyinvoisAccessToken;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
+use Laraditz\MyInvois\Exceptions\MyInvoisException;
 
 class MyInvois
 {
     private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
 
     private $hashAlgorithm = 'sha256';
+
+    private bool $hasSignature = true;
+
+    private ?MyInvoisCertificate $certificate = null;
 
     public function __construct(
         private string $client_id,
@@ -27,7 +32,7 @@ class MyInvois
         private ?string $disk = 'local',
         private ?string $document_path = null,
     ) {
-        $this->setCertificatePaths();
+        $this->checkCertificate();
     }
 
     public function getAccessToken(): ?string
@@ -67,24 +72,15 @@ class MyInvois
 
     public function generateXMLDocument(Invoice $data): string
     {
-        $hasSignature = false;
         $helper = new MyInvoisHelper();
         $service = $helper->createInvoiceXMLService();
 
-        if (
-            $this->isFileExists($this->getCertificatePath())
-            && $this->isFileExists($this->getPrivateKeyPath())
-        ) {
-            $hasSignature = true;
-        }
-
-        if ($hasSignature === true) {
+        if ($this->hasSignature === true) {
             // add signature to document
+
             $sig = new MyInvoisSignature(
                 document: $data,
-                certificatePath: $this->getCertificatePath(),
-                privateKeyPath: $this->getPrivateKeyPath(),
-                passphrase: $this->getPassphrase()
+                certificate: $this->getCertificate(),
             );
 
             $data->add('UBLExtensions', $sig->getUBLExtensions())
@@ -101,6 +97,13 @@ class MyInvois
     public function generateJSONDocument(Invoice $data)
     {
 
+    }
+
+    public function hasSignature($hasSignature = true): static
+    {
+        $this->hasSignature = $hasSignature;
+
+        return $this;
     }
 
     private function createDOM(
@@ -190,7 +193,38 @@ class MyInvois
         return new MyInvoisHelper;
     }
 
-    private function setCertificatePaths()
+    public function getCertificate(): ?MyInvoisCertificate
+    {
+        return $this->certificate;
+    }
+
+    private function setCertificate(): void
+    {
+        $certContent = file_get_contents($this->getCertificatePath());
+        $privateKeyContent = null;
+        $ext = pathinfo($this->getCertificatePath(), PATHINFO_EXTENSION);
+
+        if ($ext === 'p12' || $ext === 'pfx') {
+            if (!openssl_pkcs12_read($certContent, $certs, $this->getPassphrase())) {
+                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
+            }
+
+            $certContent = data_get($certs, 'cert');
+            $privateKeyContent = data_get($certs, 'pkey');
+        } else {
+            $privateKeyContent = file_get_contents($this->getPrivateKeyPath());
+        }
+
+        $certInfo = openssl_x509_parse($certContent);
+
+        $this->certificate = new MyInvoisCertificate(
+            certificate: $certContent,
+            privateKey: $privateKeyContent,
+            info: $certInfo
+        );
+    }
+
+    private function checkCertificate()
     {
         if ($this->certificate_path && !$this->helper()->isAbsolutePath($this->certificate_path)) {
             $this->setCertificatePath(base_path($this->certificate_path));
@@ -198,6 +232,14 @@ class MyInvois
 
         if ($this->private_key_path && !$this->helper()->isAbsolutePath($this->private_key_path)) {
             $this->setPrivateKeyPath(base_path($this->private_key_path));
+        }
+
+        if (
+            $this->isFileExists($this->getCertificatePath())
+            && $this->isFileExists($this->getPrivateKeyPath())
+        ) {
+            $this->setCertificate();
+            $this->hasSignature = true;
         }
     }
 
