@@ -134,7 +134,6 @@ enum Currency: string
     case SGD = 'Singapore Dollar';
     case SHP = 'Saint Helena Pound';
     case SLE = 'Leone';
-    case SLL = 'Leone';
     case SOS = 'Somali Shilling';
     case SRD = 'Surinam Dollar';
     case SSP = 'South Sudanese Pound';
@@ -159,7 +158,6 @@ enum Currency: string
     case UYU = 'Peso Uruguayo';
     case UYW = 'Unidad Previsional';
     case UZS = 'Uzbekistan Sum';
-    case VED = 'Bolívar Soberano';
     case VES = 'Bolívar Soberano';
     case VND = 'Dong';
     case VUV = 'Vatu';
