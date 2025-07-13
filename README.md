@@ -79,7 +79,15 @@ Run the migration command to create the necessary database tables:
 php artisan migrate
 ```
 
-### 6. Test Connection
+### 6. Run Seeder
+
+Run the seeder to furnish necessary data:
+
+```bash
+php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\MyinvoisMsicCodeSeeder
+```
+
+### 7. Test Connection
 
 Test your setup with a simple authentication call:
 

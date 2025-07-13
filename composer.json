@@ -33,7 +33,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Laraditz\\MyInvois\\": "src"
+      "Laraditz\\MyInvois\\": "src",
+      "Laraditz\\MyInvois\\Database\\Seeders\\": "database/seeders/"
     }
   },
   "autoload-dev": {
