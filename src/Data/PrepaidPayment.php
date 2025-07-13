@@ -9,7 +9,7 @@ class PrepaidPayment extends AbstractData
 {
     public function __construct(
         public string $ID,
-        public Data $PaidAmount,
+        public Money|Data $PaidAmount,
         public Carbon|string $PaidDate,
         public Carbon|string $PaidTime,
     ) {
