@@ -76,15 +76,18 @@ class MyInvois
         $service = $helper->createInvoiceXMLService();
 
         if ($this->hasSignature === true) {
-            // add signature to document
 
+            // add signature to document
             $sig = new MyInvoisSignature(
                 document: $data,
                 certificate: $this->getCertificate(),
             );
 
-            $data->add('UBLExtensions', $sig->getUBLExtensions())
-                ->add('Signature', $sig->getSignature());
+            $data->set('UBLExtensions', $sig->getUBLExtensions())
+                ->set('Signature', $sig->getSignature());
+        } else {
+            // set to version 1.0 if no signature
+            $data->InvoiceTypeCode?->attributes(['listVersionID' => '1.0']);
         }
 
         $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());

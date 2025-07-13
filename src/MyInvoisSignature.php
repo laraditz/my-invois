@@ -112,11 +112,11 @@ class MyInvoisSignature
         $transforms = [
             (new Transform(
                 XPath: 'not(//ancestor-or-self::ext:UBLExtensions)'
-            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            ))->set('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
             (new Transform(
                 XPath: 'not(//ancestor-or-self::cac:Signature)'
-            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
-            (new Transform())->add('attributes', ['Algorithm' => $xmlCanonicalizationURI]),
+            ))->set('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            (new Transform())->set('attributes', ['Algorithm' => $xmlCanonicalizationURI]),
         ];
 
         $references = [
@@ -124,11 +124,11 @@ class MyInvoisSignature
                 Transforms: new Transforms(Transform: $transforms),
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->docDigest,
-            ))->add('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
+            ))->set('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
             (new Reference(
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->propsDigest,
-            ))->add('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
+            ))->set('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
         ];
 
         $signInfo = new SignedInfo(
@@ -148,7 +148,7 @@ class MyInvoisSignature
             Object: new DataObject(
                 QualifyingProperties: $this->getQualifyingProperties()
             )
-        ))->add('attributes', ['xmlns:' . XMLNS::DS() => XMLNS::DS->getNamespace(), 'Id' => 'signature']);
+        ))->set('attributes', ['xmlns:' . XMLNS::DS() => XMLNS::DS->getNamespace(), 'Id' => 'signature']);
 
         $UBLExtensions = new UBLExtensions(
             UBLExtension: new UBLExtension(

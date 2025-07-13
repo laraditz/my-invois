@@ -12,7 +12,7 @@ class Invoice extends AbstractData
         public ?string $ID = null,
         public null|Carbon|string $IssueDate = null,
         public null|Carbon|string $IssueTime = null,
-        public ?Data $InvoiceTypeCode = null,
+        public ?InvoiceTypeCode $InvoiceTypeCode = null,
         public ?string $DocumentCurrencyCode = null,
         public ?string $TaxCurrencyCode = null,
         public ?DatePeriod $InvoicePeriod = null,
