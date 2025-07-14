@@ -28,6 +28,17 @@ class DocumentService extends BaseService
 
         if ($documents && is_array($documents) && count($documents) > 0) {
             foreach ($documents as $document) {
+                $codeNumber = $document->getCodeNumber();
+
+                $existingDocument = MyinvoisDocument::query()
+                    ->where('client_id', $this->myInvois->getClientId())
+                    ->where('code_number', $codeNumber)
+                    ->isAccepted()
+                    ->count();
+
+                if ($existingDocument > 0) {
+                    continue;
+                }
 
                 $generatedDocument = $this->myInvois->generateDocument(data: $document, format: $format);
 
@@ -35,7 +46,7 @@ class DocumentService extends BaseService
 
                 $newDocuments[] = [
                     'format' => $format?->value,
-                    'codeNumber' => $document->getCodeNumber(),
+                    'codeNumber' => $codeNumber,
                     'documentHash' => hash($this->myInvois->getHashAlgorithm(), $generatedDocument),
                     'document' => base64_encode($generatedDocument),
                     'invoiceType' => $document->getInvoiceTypeCode(),
@@ -131,6 +142,7 @@ class DocumentService extends BaseService
     {
         $acceptedDocuments = data_get($result, 'acceptedDocuments');
         $rejectedDocuments = data_get($result, 'rejectedDocuments');
+        $submissionUid = data_get($result, 'submissionUid');
 
         if ($acceptedDocuments && is_array($acceptedDocuments) && count($acceptedDocuments) > 0) {
             foreach ($acceptedDocuments as $acceptedDocument) {
@@ -145,6 +157,7 @@ class DocumentService extends BaseService
 
                     if ($myInvoisDocument) {
                         $myInvoisDocument->update([
+                            'submission_uid' => $submissionUid,
                             'uuid' => $uuid,
                             'accepted_at' => now(),
                         ]);
