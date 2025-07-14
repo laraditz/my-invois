@@ -2,8 +2,6 @@
 
 namespace Laraditz\MyInvois\Traits;
 
-use Laraditz\MyInvois\Enums\XMLNS;
-
 trait HasAttributes
 {
     public array $attributes = [];
@@ -11,5 +9,17 @@ trait HasAttributes
     public function getAttributes(): array
     {
         return $this->attributes;
+    }
+
+    public function setAttributes(array $attributes): void
+    {
+        $this->attributes = $attributes;
+    }
+
+    public function attributes(array $attributes): static
+    {
+        $this->setAttributes($attributes);
+
+        return $this;
     }
 }

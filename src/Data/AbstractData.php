@@ -202,7 +202,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
         return $this->$name;
     }
 
-    public function add(string $name, mixed $value): static
+    public function set(string $name, mixed $value): static
     {
         if (property_exists(static::class, $name)) {
             // $rp = new ReflectionProperty(static::class, $name);
@@ -211,7 +211,7 @@ abstract class AbstractData implements WithNamespace, WithValue, XmlSerializable
             //     $this->$name[] = $value;
             // } else {
             //     $this->$name = $value;
-            // }
+            // }           
             $this->$name = $value;
 
         } else {

@@ -7,7 +7,7 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class Country extends AbstractData
 {
     public function __construct(
-        public Data $IdentificationCode
+        public IdentificationCode $IdentificationCode
     ) {
     }
 

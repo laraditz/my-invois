@@ -37,16 +37,11 @@ class MyInvoisSignature
 
     private Signature $signature;
 
-    private ?MyInvoisCertificate $certificate = null;
-
     private ?MyInvoisHelper $helper = null;
-
 
     private $hashAlgorithm = 'sha256';
 
     private $signAlgorithm = OPENSSL_ALGO_SHA256;
-
-    public bool $hasSignature = false;
 
     private ?string $docDigest = null;
 
@@ -64,20 +59,15 @@ class MyInvoisSignature
 
     public function __construct(
         public Invoice $document,
-        public ?string $certificatePath = null,
-        public ?string $privateKeyPath = null,
-        public ?string $passphrase = null,
+        private MyInvoisCertificate $certificate,
     ) {
         $this->helper = new MyInvoisHelper();
-        $this->checkCertFiles();
         $this->prepare();
         $this->build(); // Step 8
     }
 
     private function prepare()
     {
-        $this->certificate = $this->getCertData(); // MyInvoisCertificate       
-
         // Step 2: Apply transformations to the document
         $service = $this->helper->createInvoiceXMLService();
         $xml = $this->helper->writeXml($service, 'Invoice', $this->document->toXmlArray());
@@ -122,11 +112,11 @@ class MyInvoisSignature
         $transforms = [
             (new Transform(
                 XPath: 'not(//ancestor-or-self::ext:UBLExtensions)'
-            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            ))->set('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
             (new Transform(
                 XPath: 'not(//ancestor-or-self::cac:Signature)'
-            ))->add('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
-            (new Transform())->add('attributes', ['Algorithm' => $xmlCanonicalizationURI]),
+            ))->set('attributes', ['Algorithm' => 'http://www.w3.org/TR/1999/REC-xpath-19991116']),
+            (new Transform())->set('attributes', ['Algorithm' => $xmlCanonicalizationURI]),
         ];
 
         $references = [
@@ -134,11 +124,11 @@ class MyInvoisSignature
                 Transforms: new Transforms(Transform: $transforms),
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->docDigest,
-            ))->add('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
+            ))->set('attributes', ['Id' => 'id-doc-signed-data', 'URI' => '']),
             (new Reference(
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->propsDigest,
-            ))->add('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
+            ))->set('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
         ];
 
         $signInfo = new SignedInfo(
@@ -158,7 +148,7 @@ class MyInvoisSignature
             Object: new DataObject(
                 QualifyingProperties: $this->getQualifyingProperties()
             )
-        ))->add('attributes', ['xmlns:' . XMLNS::DS() => XMLNS::DS->getNamespace(), 'Id' => 'signature']);
+        ))->set('attributes', ['xmlns:' . XMLNS::DS() => XMLNS::DS->getNamespace(), 'Id' => 'signature']);
 
         $UBLExtensions = new UBLExtensions(
             UBLExtension: new UBLExtension(
@@ -254,7 +244,7 @@ class MyInvoisSignature
 
         if ($ext === 'p12' || $ext === 'pfx') {
             if (!openssl_pkcs12_read($certContent, $certs, $this->passphrase)) {
-                throw new MyInvoisException('Invalid cetificate');
+                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
             }
 
             $certContent = data_get($certs, 'cert');
@@ -279,25 +269,6 @@ class MyInvoisSignature
         openssl_sign($content, $signature, $privateKey, $this->signAlgorithm);
 
         return $signature;
-    }
-
-    private function checkCertFiles()
-    {
-        if (!$this->isFileExists($this->certificatePath)) {
-            $this->certificatePath = null;
-        }
-
-        if (!$this->isFileExists($this->privateKeyPath)) {
-            $this->privateKeyPath = null;
-        }
-
-        if ($this->certificatePath && $this->privateKeyPath) {
-            $this->hasSignature = true;
-        }
-
-        if ($this->hasSignature === false) {
-            throw new MyInvoisException(__('Missing certificate and private key'));
-        }
     }
 
     public function setUBLExtensions(UBLExtensions $UBLExtensions): void

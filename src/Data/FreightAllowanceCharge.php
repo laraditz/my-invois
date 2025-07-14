@@ -9,7 +9,7 @@ class FreightAllowanceCharge extends AbstractData
     public function __construct(
         public bool $ChargeIndicator,
         public string $AllowanceChargeReason,
-        public Data $Amount,
+        public Money|Data $Amount,
     ) {
     }
 

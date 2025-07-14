@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
 [![Total Downloads](https://img.shields.io/packagist/dt/laraditz/my-invois.svg?style=flat-square)](https://packagist.org/packages/laraditz/my-invois)
-[![License](https://poser.pugx.org/laraditz/my-invois/license?format=flat-square)](./LICENSE.md)
+[![License](https://img.shields.io/packagist/l/laraditz/my-invois.svg?style=flat-square)](./LICENSE.md)
 
 ### A Developer-Friendly Laravel SDK for MyInvois e-Invoicing
 
@@ -79,7 +79,15 @@ Run the migration command to create the necessary database tables:
 php artisan migrate
 ```
 
-### 6. Test Connection
+### 6. Run Seeder
+
+Run the seeder to furnish necessary data:
+
+```bash
+php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\MyinvoisMsicCodeSeeder
+```
+
+### 7. Test Connection
 
 Test your setup with a simple authentication call:
 
@@ -508,7 +516,7 @@ This package supports UBL (Universal Business Language) data structures for e-in
 - Check internet connection
 - Try again after a few minutes
 
-### Migration Files
+### Database Tables
 
 This package will create the following tables when migration is run:
 
@@ -560,10 +568,12 @@ try {
 
 ### To Do
 
+- [ ] Add support for JSON document
 - [ ] Add all APIs
 - [ ] Add documentation
 - [ ] Add test
 - [ ] Refactor code
+- [ ] Convert some enum into DB table + seeder?
 
 ### Testing
 

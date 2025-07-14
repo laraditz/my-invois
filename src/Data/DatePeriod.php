@@ -4,13 +4,14 @@ namespace Laraditz\MyInvois\Data;
 
 use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Enums\XMLNS;
+use Laraditz\MyInvois\Enums\Frequency;
 
 class DatePeriod extends AbstractData
 {
     public function __construct(
         public Carbon $StartDate,
         public Carbon $EndDate,
-        public ?string $Description = 'Monthly',
+        public ?Frequency $Description = Frequency::Monthly,
     ) {
     }
 
@@ -18,6 +19,7 @@ class DatePeriod extends AbstractData
     {
         return match ($name) {
             'StartDate', 'EndDate' => $this->$name?->toDateString(),
+            'Description' => $this->Description?->value,
             default => $this->$name
         };
     }

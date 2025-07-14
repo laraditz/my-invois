@@ -12,4 +12,13 @@ enum InvoiceType: string
     case SelfBilledCreditNote = '12';
     case SelfBilledDebitNote = '13';
     case SelfBilledRefundNote = '14';
+
+    public static function __callStatic($method, $arguments)
+    {
+        try {
+            return static::{$method}?->value;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }

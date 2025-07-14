@@ -10,12 +10,17 @@ use Laraditz\MyInvois\Data\Invoice;
 use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Models\MyinvoisAccessToken;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
+use Laraditz\MyInvois\Exceptions\MyInvoisException;
 
 class MyInvois
 {
     private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
 
     private $hashAlgorithm = 'sha256';
+
+    private bool $hasSignature = false;
+
+    private ?MyInvoisCertificate $certificate = null;
 
     public function __construct(
         private string $client_id,
@@ -27,6 +32,7 @@ class MyInvois
         private ?string $disk = 'local',
         private ?string $document_path = null,
     ) {
+        $this->checkCertificate();
     }
 
     public function getAccessToken(): ?string
@@ -66,28 +72,22 @@ class MyInvois
 
     public function generateXMLDocument(Invoice $data): string
     {
-        $hasSignature = false;
         $helper = new MyInvoisHelper();
         $service = $helper->createInvoiceXMLService();
 
-        if (
-            $this->isFileExists($this->getCertificatePath())
-            && $this->isFileExists($this->getPrivateKeyPath())
-        ) {
-            $hasSignature = true;
-        }
+        if ($this->hasSignature === true) {
 
-        if ($hasSignature === true) {
             // add signature to document
             $sig = new MyInvoisSignature(
                 document: $data,
-                certificatePath: $this->getCertificatePath(),
-                privateKeyPath: $this->getPrivateKeyPath(),
-                passphrase: $this->getPassphrase()
+                certificate: $this->getCertificate(),
             );
 
-            $data->add('UBLExtensions', $sig->getUBLExtensions())
-                ->add('Signature', $sig->getSignature());
+            $data->set('UBLExtensions', $sig->getUBLExtensions())
+                ->set('Signature', $sig->getSignature());
+        } else {
+            // set to version 1.0 if no signature
+            $data->InvoiceTypeCode?->attributes(['listVersionID' => '1.0']);
         }
 
         $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());
@@ -102,17 +102,11 @@ class MyInvois
 
     }
 
-    private function createDOM(
-        string $version = '1.0',
-        string $encoding = 'UTF-8',
-        bool $preserveWhiteSpace = false,
-        bool $formatOutput = false
-    ): DOMDocument {
-        $dom = new DOMDocument($version, encoding: $encoding);
-        $dom->preserveWhiteSpace = $preserveWhiteSpace;
-        $dom->formatOutput = $formatOutput;
+    public function hasSignature($hasSignature = true): static
+    {
+        $this->hasSignature = $hasSignature;
 
-        return $dom;
+        return $this;
     }
 
     public function getClientId(): string
@@ -135,9 +129,19 @@ class MyInvois
         return $this->certificate_path;
     }
 
+    private function setCertificatePath(string $certificate_path)
+    {
+        $this->certificate_path = $certificate_path;
+    }
+
     public function getPrivateKeyPath(): ?string
     {
         return $this->private_key_path;
+    }
+
+    private function setPrivateKeyPath(string $private_key_path)
+    {
+        $this->private_key_path = $private_key_path;
     }
 
     public function getPassphrase(): ?string
@@ -179,6 +183,69 @@ class MyInvois
         return new MyInvoisHelper;
     }
 
+    public function getCertificate(): ?MyInvoisCertificate
+    {
+        return $this->certificate;
+    }
+
+    private function setCertificate(): void
+    {
+        $certContent = file_get_contents($this->getCertificatePath());
+        $privateKeyContent = null;
+        $ext = pathinfo($this->getCertificatePath(), PATHINFO_EXTENSION);
+
+        if ($ext === 'p12' || $ext === 'pfx') {
+            if (!openssl_pkcs12_read($certContent, $certs, $this->getPassphrase())) {
+                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
+            }
+
+            $certContent = data_get($certs, 'cert');
+            $privateKeyContent = data_get($certs, 'pkey');
+        } else {
+            $privateKeyContent = file_get_contents($this->getPrivateKeyPath());
+        }
+
+        $certInfo = openssl_x509_parse($certContent);
+
+        $this->certificate = new MyInvoisCertificate(
+            certificate: $certContent,
+            privateKey: $privateKeyContent,
+            info: $certInfo
+        );
+    }
+
+    private function checkCertificate()
+    {
+        if ($this->certificate_path && !$this->helper()->isAbsolutePath($this->certificate_path)) {
+            $this->setCertificatePath(base_path($this->certificate_path));
+        }
+
+        if ($this->private_key_path && !$this->helper()->isAbsolutePath($this->private_key_path)) {
+            $this->setPrivateKeyPath(base_path($this->private_key_path));
+        }
+
+        if (
+            $this->isFileExists($this->getCertificatePath())
+            && $this->isFileExists($this->getPrivateKeyPath())
+        ) {
+            $this->setCertificate();
+            $this->hasSignature = true;
+        }
+    }
+
+    private function createDOM(
+        string $version = '1.0',
+        string $encoding = 'UTF-8',
+        bool $preserveWhiteSpace = false,
+        bool $formatOutput = false
+    ): DOMDocument {
+        $dom = new DOMDocument($version, encoding: $encoding);
+        $dom->preserveWhiteSpace = $preserveWhiteSpace;
+        $dom->formatOutput = $formatOutput;
+
+        return $dom;
+    }
+
     public function __call($method, $arguments)
     {
         throw_if(!$this->getClientId(), LogicException::class, __('Missing Client ID.'));
@@ -209,22 +276,6 @@ class MyInvois
                 get_class(),
                 $method
             ));
-        }
-    }
-
-    // old code, will remove?
-    private function removeUnusedAttributes(DOMDocument $dom, string $tagName, array $excepts = [])
-    {
-        $extensionContent = $dom->getElementsByTagName($tagName);
-        $extensionContentAttrs = $extensionContent?->item(0)?->getAttributeNames();
-
-        if (is_array($extensionContentAttrs) && count($extensionContentAttrs) > 0) {
-            foreach ($extensionContentAttrs as $extensionContentAttr) {
-                if (!in_array($extensionContentAttr, $excepts)) {
-                    $extensionContent->item(0)->removeAttribute($extensionContentAttr);
-                }
-
-            }
         }
     }
 }

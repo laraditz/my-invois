@@ -31,4 +31,13 @@ enum State: string
             default => str($this->name)->headline()->value,
         };
     }
+
+    public static function __callStatic($method, $arguments)
+    {
+        try {
+            return static::{$method}?->value;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }

@@ -4,8 +4,9 @@ namespace Laraditz\MyInvois\Models;
 
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laraditz\MyInvois\Enums\InvoiceType;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MyinvoisDocument extends Model
 {
@@ -47,5 +48,10 @@ class MyinvoisDocument extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(MyinvoisClient::class);
+    }
+
+    protected function scopeIsAccepted(Builder $query): void
+    {
+        $query->whereNotNull('accepted_at');
     }
 }
