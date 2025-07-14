@@ -2,6 +2,29 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.3 - 2025-07-14
+
+### Added
+
+- Add `InvoiceTypeCode`, `IdentificationCode` data.
+- Add `Frequency` enum for date period frequency options (Daily, Weekly, Biweekly, Monthly, Bimonthly, Quarterly, HalfYearly, Yearly, NotApplicable).
+- Add `MyinvoisMsicCode` model with migration and seeder for MSIC (Malaysian Standard Industrial Classification) codes.
+- Add `MSICSubCategoryCodes.json` data file containing comprehensive MSIC codes and descriptions. Ref: https://sdk.myinvois.hasil.gov.my/codes/msic-codes/
+- Add `displayXml()` helper method to display XML content in browser for debugging purposes.
+- Add `removeXMLTag()` helper method to remove XML declaration tags from XML strings.
+- Add `isAbsolutePath()` helper method to check if a file path is absolute.
+
+### Changed
+
+- Move Certificate initialization from `MyInvoisSignature` to `MyInvois`.
+- Auto-convert certificate path to absolute path if path provided is relative.
+- Update `DatePeriod` data class to use the new `Frequency` enum for better type safety.
+- Improve XML handling utilities with better formatting and validation methods.
+
+### Removed
+
+- Remove `MSIC` enum.
+
 ## 0.0.2 - 2025-07-09
 
 ### Added
