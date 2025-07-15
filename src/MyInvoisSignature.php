@@ -84,8 +84,9 @@ class MyInvoisSignature
         $sig = $this->signDocumentDigest($docContent);
         $this->sig = base64_encode($sig);
 
-        // Step 5: Generate the certificate hash
-        $certHash = $this->hashContent(content: $this->certificate?->getRawCertificate(), binary: true);
+        // Step 5: Generate the certificate hash     
+        $decodedCert = base64_decode($this->certificate?->getRawCertificate());
+        $certHash = $this->hashContent(content: $decodedCert, binary: true);
         $this->certDigest = base64_encode($certHash);
 
         // Step 6: Populate the signed properties section
@@ -95,7 +96,8 @@ class MyInvoisSignature
 
         // Step 7: Generate Signed Properties Hash
         $signedPropertiesContent = $this->getSignedPropertiesContent();
-        $signedPropertiesContentHash = $this->hashContent($signedPropertiesContent, binary: true);
+        $decodedSignedPropertiesContent = base64_decode($signedPropertiesContent);
+        $signedPropertiesContentHash = $this->hashContent($decodedSignedPropertiesContent, binary: true);
         $this->propsDigest = base64_encode($signedPropertiesContentHash);
 
         // Step 8: Populate the information in the document to create the signed document
@@ -234,32 +236,6 @@ class MyInvoisSignature
         preg_match($regex, $content, $matches);
 
         return data_get($matches, 1);
-    }
-
-    private function getCertData(): MyInvoisCertificate
-    {
-        $certContent = file_get_contents($this->certificatePath);
-        $privateKeyContent = null;
-        $ext = pathinfo($this->certificatePath, PATHINFO_EXTENSION);
-
-        if ($ext === 'p12' || $ext === 'pfx') {
-            if (!openssl_pkcs12_read($certContent, $certs, $this->passphrase)) {
-                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
-            }
-
-            $certContent = data_get($certs, 'cert');
-            $privateKeyContent = data_get($certs, 'pkey');
-        } else {
-            $privateKeyContent = file_get_contents($this->privateKeyPath);
-        }
-
-        $certInfo = openssl_x509_parse($certContent);
-
-        return new MyInvoisCertificate(
-            certificate: $certContent,
-            privateKey: $privateKeyContent,
-            info: $certInfo
-        );
     }
 
     private function signDocumentDigest(string $content): string
