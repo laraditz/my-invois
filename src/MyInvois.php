@@ -91,6 +91,11 @@ class MyInvois
         }
 
         $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());
+
+        $dom = $this->helper()->createDOM();
+        $dom->loadXML($content);
+        $content = $dom->C14N();
+
         // $helper->displayXml($content);
 
         return $content;

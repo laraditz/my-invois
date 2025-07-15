@@ -96,8 +96,7 @@ class MyInvoisSignature
 
         // Step 7: Generate Signed Properties Hash
         $signedPropertiesContent = $this->getSignedPropertiesContent();
-        $decodedSignedPropertiesContent = base64_decode($signedPropertiesContent);
-        $signedPropertiesContentHash = $this->hashContent($decodedSignedPropertiesContent, binary: true);
+        $signedPropertiesContentHash = $this->hashContent($signedPropertiesContent, binary: true);
         $this->propsDigest = base64_encode($signedPropertiesContentHash);
 
         // Step 8: Populate the information in the document to create the signed document
@@ -130,8 +129,9 @@ class MyInvoisSignature
             (new Reference(
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->propsDigest,
-            ))->set('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
+            ))->set('attributes', ['Type' => 'http://uri.etsi.org/01903/v1.3.2#SignedProperties', 'URI' => '#id-xades-signed-props']),
         ];
+        //In sample TYPE=http://www.w3.org/2000/09/xmldsig#SignatureProperties
 
         $signInfo = new SignedInfo(
             CanonicalizationMethod: new Data('', ['Algorithm' => $xmlCanonicalizationURI]),
@@ -224,18 +224,31 @@ class MyInvoisSignature
     private function getSignedPropertiesContent(): ?string
     {
         $service = $this->helper->createQualifyingPropertiesXMLService();
-
+        // dd($this->getQualifyingProperties()?->toXmlArray());
         $xml = $this->helper->writeXml($service, 'root', $this->getQualifyingProperties()?->toXmlArray());
-        $xml = $this->helper->removeXMLTag($xml);
+
+        //$xml = $this->helper->removeXMLTag($xml);
 
         $dom = $this->helper->createDOM();
         $dom->loadXML($xml);
         $content = $dom->C14N();
+        $content = $this->helper->removeXMLTag($content);
+        $content = str_replace('Id="id-xades-signed-props">', 'Id="id-xades-signed-props" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">', $content);
+        $content = str_replace('DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"', 'DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"', $content);
+        $content = str_replace('<ds:DigestValue>', '<ds:DigestValue xmlns:ds="http://www.w3.org/2000/09/xmldsig#">', $content);
+        $content = str_replace('<ds:X509IssuerName>', '<ds:X509IssuerName xmlns:ds="http://www.w3.org/2000/09/xmldsig#">', $content);
+        $content = str_replace('<ds:X509SerialNumber>', '<ds:X509SerialNumber xmlns:ds="http://www.w3.org/2000/09/xmldsig#">', $content);
+
+        // $this->helper->displayXml($content);
+
 
         $regex = "#<\s*?root\b[^>]*>(.*?)</root\b[^>]*>#"; // Remove the root node and only get the SignedProperties node 
         preg_match($regex, $content, $matches);
 
-        return data_get($matches, 1);
+        $signedPropertiesContent = data_get($matches, 1);
+        // dd($signedPropertiesContent);
+
+        return $signedPropertiesContent;
     }
 
     private function signDocumentDigest(string $content): string
