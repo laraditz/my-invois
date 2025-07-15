@@ -14,7 +14,7 @@ use Laraditz\MyInvois\Exceptions\MyInvoisException;
 
 class MyInvois
 {
-    private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
+    private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document', 'document_submission'];
 
     private $hashAlgorithm = 'sha256';
 
