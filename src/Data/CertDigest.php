@@ -8,7 +8,7 @@ class CertDigest extends AbstractData
 {
     public function __construct(
         public Data $DigestMethod,
-        public string $DigestValue,
+        public Data|string $DigestValue,
     ) {
     }
 
