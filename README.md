@@ -53,6 +53,7 @@ MYINVOIS_DISK="local" // disk for storing documents
 MYINVOIS_DOCUMENT_PATH="myinvois/" // path for storing documents
 MYINVOIS_CERTIFICATE_PATH="/path/to/certificate.p12" // path to certificate file
 MYINVOIS_PRIVATE_KEY_PATH="/path/to/private_key.pem" // path to private key file
+MYINVOIS_ON_BEHALF_OF=C258456320XX // Taxpayer's TIN or ROB number
 ```
 
 ### 3. Publish Config (Optional)
@@ -119,12 +120,15 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Document Service `document()`
 
-| Method      | Description                                              | Parameters              |
-| ----------- | -------------------------------------------------------- | ----------------------- |
-| `submit()`  | Submit one or more signed documents                      | `documents[]`, `format` |
-| `recent()`  | Return documents that are issued within the last 31 days | Refer doc               |
-| `get()`     | Get raw details of the document                          | `uuid`                  |
-| `details()` | Get full details of the document                         | `uuid`                  |
+| Method      | Description                                                                                | Parameters                      |
+| ----------- | ------------------------------------------------------------------------------------------ | ------------------------------- |
+| `submit()`  | Submit one or more signed documents                                                        | `documents[]`, `format`         |
+| `recent()`  | Return documents that are issued within the last 31 days                                   | Refer doc                       |
+| `search()`  | Query the system and return list of documents that have been received or issued            | `submissionDateFrom`. Refer doc |
+| `get()`     | Get raw details of the document                                                            | `uuid`                          |
+| `details()` | Get full details of the document                                                           | `uuid`                          |
+| `cancel()`  | Allows issuer to cancel previously issued document                                         | `uuid`, `reason`                |
+| `reject()`  | Allows a buyer that received an invoice to reject it and request the supplier to cancel it | `uuid`, `reason`                |
 
 ### Document Submission Service `documentSubmission()`
 
@@ -140,9 +144,10 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Taxpayer Service `taxpayer()`
 
-| Method       | Description                              | Parameters                 |
-| ------------ | ---------------------------------------- | -------------------------- |
-| `validate()` | Validate TIN (Tax Identification Number) | `tin`, `idType`, `idValue` |
+| Method          | Description                                           | Parameters                          |
+| --------------- | ----------------------------------------------------- | ----------------------------------- |
+| `validateTin()` | Validate TIN (Tax Identification Number)              | `tin`, `idType`, `idValue`          |
+| `searchTin()`   | Search for a specific Tax Identification Number (TIN) | `idType`, `idValue`, `taxpayerName` |
 
 ### Document Generation Methods
 
@@ -153,6 +158,8 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 ## Usage
 
 ### Basic Authentication
+
+You do not need to perform the authentication manually. The SDK will know when to get and append the access token based on your API request.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
@@ -217,7 +224,7 @@ $result = MyInvois::document()->submit(
 use Laraditz\MyInvois\Facades\MyInvois;
 
 // Validate TIN
-$validation = MyInvois::taxpayer()->validate(tin: 'AB123456789012', idType: 'NRIC', idValue: '200101011234');
+$validation = MyInvois::taxpayer()->validateTin(tin: 'AB123456789012', idType: 'NRIC', idValue: '200101011234');
 ```
 
 ### Notification Retrieval
@@ -484,16 +491,17 @@ This package supports UBL (Universal Business Language) data structures for e-in
 
 ### Environment Variables Reference
 
-| Variable                    | Description                 | Default                  | Required |
-| --------------------------- | --------------------------- | ------------------------ | -------- |
-| `MYINVOIS_CLIENT_ID`        | Client ID from MyInvois     | -                        | Yes      |
-| `MYINVOIS_CLIENT_SECRET`    | Client Secret from MyInvois | -                        | Yes      |
-| `MYINVOIS_PASSPHRASE`       | Passphrase for certificate  | -                        | No       |
-| `MYINVOIS_SANDBOX`          | Sandbox mode for testing    | false                    | No       |
-| `MYINVOIS_DISK`             | Disk for storing documents  | local                    | No       |
-| `MYINVOIS_DOCUMENT_PATH`    | Path for storing documents  | myinvois/                | No       |
-| `MYINVOIS_CERTIFICATE_PATH` | Path to certificate file    | storage/app/myinvois.p12 | No       |
-| `MYINVOIS_PRIVATE_KEY_PATH` | Path to private key file    | storage/app/myinvois.pem | No       |
+| Variable                    | Description                            | Default                  | Required |
+| --------------------------- | -------------------------------------- | ------------------------ | -------- |
+| `MYINVOIS_CLIENT_ID`        | Client ID from MyInvois                | -                        | Yes      |
+| `MYINVOIS_CLIENT_SECRET`    | Client Secret from MyInvois            | -                        | Yes      |
+| `MYINVOIS_PASSPHRASE`       | Passphrase for certificate             | -                        | No       |
+| `MYINVOIS_SANDBOX`          | Sandbox mode for testing               | false                    | No       |
+| `MYINVOIS_DISK`             | Disk for storing documents             | local                    | No       |
+| `MYINVOIS_DOCUMENT_PATH`    | Path for storing documents             | myinvois/                | No       |
+| `MYINVOIS_CERTIFICATE_PATH` | Path to certificate file               | storage/app/myinvois.p12 | No       |
+| `MYINVOIS_PRIVATE_KEY_PATH` | Path to private key file               | storage/app/myinvois.pem | No       |
+| `MYINVOIS_ON_BEHALF_OF`     | Taxpayer's TIN for intermediary system | null                     | No       |
 
 ### Best Practices
 
@@ -577,12 +585,12 @@ try {
 
 ### To Do
 
-- [ ] Add support for JSON document
 - [ ] Add all APIs
+- [ ] Add support for JSON document
+- [ ] Add complete example for creating invoice
+- [ ] Convert some enum into DB table + seeder?
 - [ ] Add documentation
 - [ ] Add test
-- [ ] Refactor code
-- [ ] Convert some enum into DB table + seeder?
 
 ### Testing
 

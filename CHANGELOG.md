@@ -2,6 +2,18 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.5 - 2025-07-16
+
+### Added
+
+- Add taxpayer `search` API.
+- Add document `search`, `cancel` and `reject` API.
+- Add `on_behalf_of` as part of constructer property.
+
+### Changed
+
+- Rename taxpayer `validate` to `validateTin`.
+
 ## 0.0.4 - 2025-07-16
 
 ### Changed
