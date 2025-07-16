@@ -319,14 +319,15 @@ MYINVOIS_SANDBOX=true
 For documents that require digital signature:
 
 ```php
-// Make sure certificate and private key paths are correct in .env
+// Make sure certificate and private key paths are correct in .env. The path can be absolute path or relative to your application.
 MYINVOIS_CERTIFICATE_PATH="/path/to/certificate.p12"
 MYINVOIS_PRIVATE_KEY_PATH="/path/to/private_key.pem"
-MYINVOIS_PASSPHRASE="your_passphrase"
+MYINVOIS_PASSPHRASE="your_passphrase" // if needed
 
 // Package will automatically add signature if certificate exists
-$xmlDocument = MyInvois::generateXMLDocument($invoice);
 ```
+
+More information on Signature: [Signature](https://sdk.myinvois.hasil.gov.my/signature/) | [Signature Creation](https://sdk.myinvois.hasil.gov.my/signature-creation/)
 
 ### Complete Example: Creating and Submitting Invoice
 
