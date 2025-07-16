@@ -31,6 +31,7 @@ class MyInvois
         private ?string $passphrase = null,
         private ?string $disk = 'local',
         private ?string $document_path = null,
+        private ?string $on_behalf_of = null,
     ) {
         $this->checkCertificate();
     }
@@ -49,7 +50,8 @@ class MyInvois
                 client_id: $this->getClientId(),
                 client_secret: $this->getClientSecret(),
                 grant_type: 'client_credentials',
-                scope: 'InvoicingAPI'
+                scope: 'InvoicingAPI',
+                onbehalfof: $this->getOnBehalfOf(),
             );
 
             $accessToken = data_get($myinvois, 'data.access_token');
@@ -122,6 +124,11 @@ class MyInvois
     public function getClientSecret(): string
     {
         return $this->client_secret;
+    }
+
+    public function getOnBehalfOf(): string
+    {
+        return $this->on_behalf_of;
     }
 
     public function isSandbox(): bool

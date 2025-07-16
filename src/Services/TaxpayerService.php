@@ -6,7 +6,7 @@ use Laraditz\MyInvois\Exceptions\MyInvoisException;
 
 class TaxpayerService extends BaseService
 {
-    public function beforeValidateRequest()
+    public function beforeValidateTinRequest()
     {
         $payload = $this->getPayload();
 
