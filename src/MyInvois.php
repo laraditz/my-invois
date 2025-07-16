@@ -126,7 +126,7 @@ class MyInvois
         return $this->client_secret;
     }
 
-    public function getOnBehalfOf(): string
+    public function getOnBehalfOf(): ?string
     {
         return $this->on_behalf_of;
     }
