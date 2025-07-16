@@ -40,7 +40,7 @@ return [
             'details' => '/api/v1.0/documents/{uuid}/details',
         ],
         'document_submission' => [
-            'get' => '/api/v1.0/documentsubmissions/{id}',
+            'get' => '/api/v1.0/documentsubmissions/{submissionUid}',
         ],
     ]
 ];

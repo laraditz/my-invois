@@ -119,9 +119,18 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 ### Document Service `document()`
 
-| Method     | Description                         | Parameters              |
-| ---------- | ----------------------------------- | ----------------------- |
-| `submit()` | Submit one or more signed documents | `documents[]`, `format` |
+| Method      | Description                                              | Parameters              |
+| ----------- | -------------------------------------------------------- | ----------------------- |
+| `submit()`  | Submit one or more signed documents                      | `documents[]`, `format` |
+| `recent()`  | Return documents that are issued within the last 31 days | Refer doc               |
+| `get()`     | Get raw details of the document                          | `uuid`                  |
+| `details()` | Get full details of the document                         | `uuid`                  |
+
+### Document Submission Service `documentSubmission()`
+
+| Method  | Description                                                                                     | Parameters      |
+| ------- | ----------------------------------------------------------------------------------------------- | --------------- |
+| `get()` | Get details of a single submission to check its processing status after initially submitting it | `submissionUid` |
 
 ### Notification Service `notification()`
 
