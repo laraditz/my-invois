@@ -232,7 +232,7 @@ class MyInvoisSignature
         $content = $dom->C14N(exclusive: true, nsPrefixes: [XMLNS::XADES->getNamespace(), XMLNS::DS->getNamespace()]);
         // $this->helper->displayXml($content);
 
-        // attributes need to be in this sequence. Got a better way?
+        // Attributes need to be in this sequence. Quick and dirty hack. Got a better way?
         $content = str_replace('xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="id-xades-signed-props"', 'Id="id-xades-signed-props" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"', $content);
         $content = str_replace('xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"', 'Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"', $content);
 
