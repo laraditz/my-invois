@@ -39,14 +39,14 @@ class MyInvoisHelper
 
         return $service;
     }
-    public function writeXml(Service $service, $rootElement = '', array $xml = []): string
+    public function writeXml(Service $service, $rootElement = '', array $xml = [], int $options = 0): string
     {
         $xmlData = $service->write($rootElement, $xml);
 
         $dom = $this->createDOM();
-        $dom->loadXML($xmlData);
+        $dom->loadXML($xmlData, $options);
 
-        return $dom->saveXML();
+        return $dom->saveXML(options: $options);
     }
 
     public function displayXml(string $xml)
@@ -62,7 +62,7 @@ class MyInvoisHelper
         bool $preserveWhiteSpace = false,
         bool $formatOutput = false
     ): DOMDocument {
-        $dom = new DOMDocument($version, encoding: $encoding);
+        $dom = new DOMDocument(version: $version, encoding: $encoding);
         $dom->preserveWhiteSpace = $preserveWhiteSpace;
         $dom->formatOutput = $formatOutput;
 

@@ -2,6 +2,13 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.4 - 2025-07-16
+
+### Changed
+
+- Fix bug `DigestValue` for Cert Digest need to base64 decode first.
+- Fix bug when generating hashed `SignedProperties`. Need extra attributes when hashing as compared to final document.
+
 ## 0.0.3 - 2025-07-14
 
 ### Added

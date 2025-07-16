@@ -84,8 +84,9 @@ class MyInvoisSignature
         $sig = $this->signDocumentDigest($docContent);
         $this->sig = base64_encode($sig);
 
-        // Step 5: Generate the certificate hash
-        $certHash = $this->hashContent(content: $this->certificate?->getRawCertificate(), binary: true);
+        // Step 5: Generate the certificate hash     
+        $decodedCert = base64_decode($this->certificate?->getRawCertificate());
+        $certHash = $this->hashContent(content: $decodedCert, binary: true);
         $this->certDigest = base64_encode($certHash);
 
         // Step 6: Populate the signed properties section
@@ -128,8 +129,8 @@ class MyInvoisSignature
             (new Reference(
                 DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
                 DigestValue: $this->propsDigest,
-            ))->set('attributes', ['Type' => 'http://www.w3.org/2000/09/xmldsig#SignatureProperties', 'URI' => '#id-xades-signed-props']),
-        ];
+            ))->set('attributes', ['Type' => 'http://uri.etsi.org/01903/v1.3.2#SignedProperties', 'URI' => '#id-xades-signed-props']),
+        ]; //Why in LHDN sample Type=http://www.w3.org/2000/09/xmldsig#SignatureProperties ?
 
         $signInfo = new SignedInfo(
             CanonicalizationMethod: new Data('', ['Algorithm' => $xmlCanonicalizationURI]),
@@ -180,26 +181,27 @@ class MyInvoisSignature
     private function getSignedProperties(): SignedProperties
     {
         $xmlEncAlgo = $this->getXmlEncAlgo();
+        $digestMethodAttributes = ['Algorithm' => $xmlEncAlgo];
 
         $cert = new Cert(
             CertDigest: new CertDigest(
-                DigestMethod: new Data('', ['Algorithm' => $xmlEncAlgo]),
-                DigestValue: $this->certDigest,
+                DigestMethod: new Data('', $digestMethodAttributes),
+                DigestValue: new Data($this->certDigest),
             ),
             IssuerSerial: new IssuerSerial(
-                X509IssuerName: $this->issuerName,
-                X509SerialNumber: $this->serialNumber
+                X509IssuerName: new Data($this->issuerName),
+                X509SerialNumber: new Data($this->serialNumber)
             )
         );
 
-        return new SignedProperties(
-            new SignedSignatureProperties(
-                SigningTime: $this->signingTime?->toIso8601ZuluString(),
-                SigningCertificate: new SigningCertificate(
-                    Cert: $cert
-                ),
-            )
+        $SignedSignatureProperties = new SignedSignatureProperties(
+            SigningTime: $this->signingTime?->toIso8601ZuluString(),
+            SigningCertificate: new SigningCertificate(
+                Cert: $cert
+            ),
         );
+
+        return new SignedProperties($SignedSignatureProperties);
     }
 
     private function getQualifyingProperties(): QualifyingProperties
@@ -222,44 +224,24 @@ class MyInvoisSignature
     private function getSignedPropertiesContent(): ?string
     {
         $service = $this->helper->createQualifyingPropertiesXMLService();
-
-        $xml = $this->helper->writeXml($service, 'root', $this->getQualifyingProperties()?->toXmlArray());
-        $xml = $this->helper->removeXMLTag($xml);
+        $xml = $service->write('root', $this->getQualifyingProperties()?->toXmlArray());
 
         $dom = $this->helper->createDOM();
-        $dom->loadXML($xml);
-        $content = $dom->C14N();
+        $dom->loadXML($xml, LIBXML_NOEMPTYTAG);
+
+        $content = $dom->C14N(exclusive: true, nsPrefixes: [XMLNS::XADES->getNamespace(), XMLNS::DS->getNamespace()]);
+        // $this->helper->displayXml($content);
+
+        // attributes need to be in this sequence. Got a better way?
+        $content = str_replace('xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="id-xades-signed-props"', 'Id="id-xades-signed-props" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"', $content);
+        $content = str_replace('xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"', 'Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"', $content);
 
         $regex = "#<\s*?root\b[^>]*>(.*?)</root\b[^>]*>#"; // Remove the root node and only get the SignedProperties node 
         preg_match($regex, $content, $matches);
 
-        return data_get($matches, 1);
-    }
+        $signedPropertiesContent = data_get($matches, 1);
 
-    private function getCertData(): MyInvoisCertificate
-    {
-        $certContent = file_get_contents($this->certificatePath);
-        $privateKeyContent = null;
-        $ext = pathinfo($this->certificatePath, PATHINFO_EXTENSION);
-
-        if ($ext === 'p12' || $ext === 'pfx') {
-            if (!openssl_pkcs12_read($certContent, $certs, $this->passphrase)) {
-                throw new MyInvoisException('OpenSSL Error: ' . openssl_error_string() ?? 'Invalid cetificate');
-            }
-
-            $certContent = data_get($certs, 'cert');
-            $privateKeyContent = data_get($certs, 'pkey');
-        } else {
-            $privateKeyContent = file_get_contents($this->privateKeyPath);
-        }
-
-        $certInfo = openssl_x509_parse($certContent);
-
-        return new MyInvoisCertificate(
-            certificate: $certContent,
-            privateKey: $privateKeyContent,
-            info: $certInfo
-        );
+        return $signedPropertiesContent;
     }
 
     private function signDocumentDigest(string $content): string

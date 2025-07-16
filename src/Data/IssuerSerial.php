@@ -8,8 +8,8 @@ use Laraditz\MyInvois\Attributes\Attributes;
 class IssuerSerial extends AbstractData
 {
     public function __construct(
-        public string $X509IssuerName,
-        public string $X509SerialNumber
+        public Data|string $X509IssuerName,
+        public Data|string $X509SerialNumber
     ) {
     }
 

@@ -14,7 +14,7 @@ use Laraditz\MyInvois\Exceptions\MyInvoisException;
 
 class MyInvois
 {
-    private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document'];
+    private $services = ['auth', 'document_type', 'taxpayer', 'notification', 'document', 'document_submission'];
 
     private $hashAlgorithm = 'sha256';
 
@@ -91,6 +91,11 @@ class MyInvois
         }
 
         $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());
+
+        $dom = $this->helper()->createDOM();
+        $dom->loadXML($content);
+        $content = $dom->C14N();
+
         // $helper->displayXml($content);
 
         return $content;

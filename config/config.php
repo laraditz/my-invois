@@ -34,7 +34,13 @@ return [
             'validate' => '/api/v1.0/taxpayer/validate/{tin}'
         ],
         'document' => [
-            'submit' => 'POST /api/v1.0/documentsubmissions'
-        ]
+            'submit' => 'POST /api/v1.0/documentsubmissions',
+            'recent' => '/api/v1.0/documents/recent',
+            'get' => '/api/v1.0/documents/{uuid}/raw',
+            'details' => '/api/v1.0/documents/{uuid}/details',
+        ],
+        'document_submission' => [
+            'get' => '/api/v1.0/documentsubmissions/{submissionUid}',
+        ],
     ]
 ];

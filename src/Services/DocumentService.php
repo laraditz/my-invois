@@ -193,6 +193,23 @@ class DocumentService extends BaseService
         }
     }
 
+    public function beforeDetailsRequest()
+    {
+        $payload = $this->getPayload();
+        $params = $this->getParams();
+        $uuid = null;
+
+        if (count($payload) > 0) {
+            $uuid = data_get($payload, 0) ?? data_get($payload, 'uuid');
+
+            if ($uuid) {
+                $this->setParams(['uuid' => $uuid]);
+            }
+        }
+
+        throw_if(!($uuid || data_get($params, 'uuid')), MyInvoisException::class, __('Missing uuid parameter.'));
+    }
+
     private function addHistory(MyinvoisDocument $myInvoisDocument): void
     {
         $attributes = [
