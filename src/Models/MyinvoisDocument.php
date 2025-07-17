@@ -2,6 +2,7 @@
 
 namespace Laraditz\MyInvois\Models;
 
+use Laraditz\MyInvois\Enums\DocumentStatus;
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Database\Eloquent\Model;
 use Laraditz\MyInvois\Enums\InvoiceType;
@@ -22,11 +23,18 @@ class MyinvoisDocument extends Model
         'hash',
         'submission_uid',
         'uuid',
+        'long_id',
+        'status',
         'error',
         'error_code',
         'error_message',
         'accepted_at',
-        'rejected_at'
+        'rejected_at',
+        'issued_at',
+        'validated_at',
+        'cancel_at',
+        'reject_request_at',
+        'status_reason'
     ];
 
     protected function casts(): array
@@ -34,9 +42,14 @@ class MyinvoisDocument extends Model
         return [
             'type' => InvoiceType::class,
             'format' => Format::class,
+            'status' => DocumentStatus::class,
             'error' => 'json',
             'accepted_at' => 'timestamp',
             'rejected_at' => 'timestamp',
+            'issued_at' => 'timestamp',
+            'validated_at' => 'timestamp',
+            'cancel_at' => 'timestamp',
+            'reject_request_at' => 'timestamp',
         ];
     }
 

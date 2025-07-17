@@ -25,16 +25,25 @@ return new class extends Migration {
             $table->string('hash')->nullable();
             $table->string('submission_uid')->nullable();
             $table->string('uuid')->nullable();
+            $table->string('long_id')->nullable();
+            $table->tinyInteger('status')->nullable();
             $table->json('error')->nullable();
             $table->string('error_code', 10)->nullable();
             $table->string('error_message')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('rejected_at')->nullable();
+            $table->timestamp('issued_at')->nullable();
+            $table->timestamp('validated_at')->nullable();
+            $table->timestamp('cancel_at')->nullable();
+            $table->timestamp('reject_request_at')->nullable();
+            $table->string('status_reason')->nullable();
             $table->timestamps();
 
             $table->index('client_id');
             $table->index('request_id');
             $table->index('code_number');
+            $table->index('uuid');
+            $table->index('status');
         });
     }
 
