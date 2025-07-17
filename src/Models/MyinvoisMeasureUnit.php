@@ -5,12 +5,11 @@ namespace Laraditz\MyInvois\Models;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 
-class MyinvoisMsicCode extends Model
+class MyinvoisMeasureUnit extends Model
 {
     protected $fillable = [
         'code',
-        'description',
-        'category',
+        'name',
     ];
 
     protected function code(string $code): ?self

@@ -85,7 +85,7 @@ php artisan migrate
 Run the seeder to furnish necessary data:
 
 ```bash
-php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\MyinvoisMsicCodeSeeder
+php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\DatabaseSeeder
 ```
 
 ### 7. Test Connection
@@ -216,6 +216,16 @@ $result = MyInvois::document()->submit(
     documents: [$invoice], // can submit multiple invoices
     format: Format::XML
 );
+```
+
+### Document Details
+
+```php
+use Laraditz\MyInvois\Facades\MyInvois;
+
+$uuid = 'JEEA7W331XXXNBAXXX71880XXX';
+// Automatically update the record in myinvois_documents table such as status, long_id etc.
+$details = MyInvois::document()->details($uuid);
 ```
 
 ### Taxpayer Validation
@@ -445,7 +455,7 @@ $legalMonetaryTotal = new LegalMonetaryTotal(
 
 // Create invoice
 $invoice = new Invoice(
-    ID: 'INV-2024-001',
+    ID: 'INV-2025-001',
     IssueDate: now(),
     IssueTime: now(),
     InvoiceTypeCode: new Data('380'), // Standard Invoice
@@ -543,6 +553,7 @@ This package will create the following tables when migration is run:
 - `myinvois_requests` - Store all requests and responses
 - `myinvois_documents` - Store submitted documents
 - `myinvois_document_histories` - Store previously submitted documents
+- `myinvois_msic_codes` - Store MSIC codes
 
 ### Exception Handling
 

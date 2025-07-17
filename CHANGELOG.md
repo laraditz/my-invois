@@ -2,6 +2,18 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.8 - 2025-07-17
+
+### Added
+
+- Add `myinvois_measure_units` table to store measure units.
+- Add `MyinvoisMeasureUnitSeeder` seedeer.
+- Add `DatabaseSeeder`.
+
+### Removed
+
+- Remove `MeasureUnit` enum.
+
 ## 0.0.7 - 2025-07-17
 
 ### Added
