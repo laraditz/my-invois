@@ -553,6 +553,7 @@ This package will create the following tables when migration is run:
 - `myinvois_requests` - Store all requests and responses
 - `myinvois_documents` - Store submitted documents
 - `myinvois_document_histories` - Store previously submitted documents
+- `myinvois_msic_codes` - Store MSIC codes
 
 ### Exception Handling
 
