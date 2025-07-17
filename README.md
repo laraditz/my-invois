@@ -218,6 +218,16 @@ $result = MyInvois::document()->submit(
 );
 ```
 
+### Document Details
+
+```php
+use Laraditz\MyInvois\Facades\MyInvois;
+
+$uuid = 'JEEA7W331XXXNBAXXX71880XXX';
+// Automatically update the record in myinvois_documents table such as status, long_id etc.
+$details = MyInvois::document()->details($uuid);
+```
+
 ### Taxpayer Validation
 
 ```php
