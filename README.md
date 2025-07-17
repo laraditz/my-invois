@@ -455,7 +455,7 @@ $legalMonetaryTotal = new LegalMonetaryTotal(
 
 // Create invoice
 $invoice = new Invoice(
-    ID: 'INV-2024-001',
+    ID: 'INV-2025-001',
     IssueDate: now(),
     IssueTime: now(),
     InvoiceTypeCode: new Data('380'), // Standard Invoice
