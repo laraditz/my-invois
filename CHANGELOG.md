@@ -2,6 +2,17 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.7 - 2025-07-17
+
+### Added
+
+- Add `DocumentStatus` enum.
+- Add `afterDetailsResponse`method to `Document` service.
+
+### Changed
+
+- Alter `myinvois_documents` table add more fields `long_id`, `status`, `issued_at`, `validated_at`, `cancel_at`, `reject_request_at` and `status_reason`.
+
 ## 0.0.6 - 2025-07-17
 
 ### Changed
