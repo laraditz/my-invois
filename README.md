@@ -85,7 +85,7 @@ php artisan migrate
 Run the seeder to furnish necessary data:
 
 ```bash
-php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\MyinvoisMsicCodeSeeder
+php artisan db:seed --class=Laraditz\\MyInvois\\Database\\Seeders\\DatabaseSeeder
 ```
 
 ### 7. Test Connection
