@@ -3,8 +3,10 @@
 namespace Laraditz\MyInvois\Services;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Support\Facades\Storage;
+use Laraditz\MyInvois\Enums\DocumentStatus;
 use Laraditz\MyInvois\Models\MyinvoisRequest;
 use Laraditz\MyInvois\Models\MyinvoisDocument;
 use Laraditz\MyInvois\Exceptions\MyInvoisException;
@@ -208,6 +210,33 @@ class DocumentService extends BaseService
         }
 
         throw_if(!($uuid || data_get($params, 'uuid')), MyInvoisException::class, __('Missing uuid parameter.'));
+    }
+
+    public function afterDetailsResponse(MyinvoisRequest $request, array $result = []): void
+    {
+        $uuid = data_get($result, 'uuid');
+        $longId = data_get($result, 'longId');
+        $dateTimeValidated = data_get($result, 'dateTimeValidated');
+        $status = data_get($result, 'status');
+        $documentStatusReason = data_get($result, 'documentStatusReason');
+        $cancelDateTime = data_get($result, 'cancelDateTime');
+        $rejectRequestDateTime = data_get($result, 'rejectRequestDateTime');
+        $dateTimeIssued = data_get($result, 'dateTimeIssued');
+        $appTimezone = config('app.timezone'); // get app timezone
+
+        $document = MyinvoisDocument::query()->where('uuid', $uuid)->first();
+
+        if ($document) {
+            $document->update([
+                'long_id' => $longId,
+                'status' => $status ? DocumentStatus::tryFromName($status) : null,
+                'issued_at' => $dateTimeIssued ? Carbon::parse($dateTimeIssued)->timezone($appTimezone) : null,
+                'validated_at' => $dateTimeValidated ? Carbon::parse($dateTimeValidated)->timezone($appTimezone) : null,
+                'cancel_at' => $cancelDateTime ? Carbon::parse($cancelDateTime)->timezone($appTimezone) : null,
+                'reject_request_at' => $rejectRequestDateTime ? Carbon::parse($rejectRequestDateTime)->timezone($appTimezone) : null,
+                'status_reason' => $documentStatusReason,
+            ]);
+        }
     }
 
     private function addHistory(MyinvoisDocument $myInvoisDocument): void
