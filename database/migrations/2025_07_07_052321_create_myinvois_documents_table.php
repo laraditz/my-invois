@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignIdFor(MyinvoisClient::class, 'client_id');
             $table->foreignIdFor(MyinvoisRequest::class, 'request_id');
             $table->string('code_number');
-            $table->string('type')->nullable();
+            $table->string('type', 10)->nullable();
             $table->string('format', 10);
             $table->string('file_name')->nullable();
             $table->string('file_path')->nullable();
