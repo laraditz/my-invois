@@ -155,6 +155,16 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 | -------------------- | --------------------------------------- | --------------------------------- | ----------- |
 | `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
 
+## Event
+
+This package also provide an event to allow your application to listen for MyInvois events. You can create your listener and register it under event below.
+
+| Event                                          | Description                              |
+| ---------------------------------------------- | ---------------------------------------- |
+| Laraditz\MyInvois\Events\DocumentStatusUpdated | Trigger whenever document status updated |
+
+> Please note that LHDNM MyInvois do not provide any event webhook for the document status. So we need to check using `Document Details` service from time to time so that the status will get updated and trigger the `DocumentStatusUpdated` event.
+
 ## Usage
 
 ### Basic Authentication
@@ -227,6 +237,8 @@ $uuid = 'JEEA7W331XXXNBAXXX71880XXX';
 // Automatically update the record in myinvois_documents table such as status, long_id etc.
 $details = MyInvois::document()->details($uuid);
 ```
+
+> As LHDNM MyInvois do not provide any event webhook, you are encourage to call this API after submitting document to get the latest document status. It may take some time for LHDNM to validate your document, so you may need to check from time to time until the document status is `Valid` or `Invalid`.
 
 ### Taxpayer Validation
 

@@ -2,13 +2,16 @@
 
 namespace Laraditz\MyInvois\Models;
 
-use Laraditz\MyInvois\Enums\DocumentStatus;
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Database\Eloquent\Model;
 use Laraditz\MyInvois\Enums\InvoiceType;
 use Illuminate\Database\Eloquent\Builder;
+use Laraditz\MyInvois\Enums\DocumentStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Laraditz\MyInvois\Observers\MyinvoisDocumentObserver;
 
+#[ObservedBy([MyinvoisDocumentObserver::class])]
 class MyinvoisDocument extends Model
 {
     protected $fillable = [

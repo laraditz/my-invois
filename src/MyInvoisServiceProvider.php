@@ -71,6 +71,7 @@ class MyInvoisServiceProvider extends ServiceProvider
                 passphrase: config('myinvois.passphrase'),
                 disk: config('myinvois.disk'),
                 document_path: config('myinvois.document_path'),
+                on_behalf_of: config('myinvois.on_behalf_of'),
             );
         });
 
