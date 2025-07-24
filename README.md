@@ -163,7 +163,7 @@ This package also provide an event to allow your application to listen for MyInv
 | ---------------------------------------------- | ---------------------------------------- |
 | Laraditz\MyInvois\Events\DocumentStatusUpdated | Trigger whenever document status updated |
 
-> Please note that LHDNM MyInvois do not provide any event webhook for the document status. So we need to check using `Document Details` service from time to time so that the status will get updated and trigger the `DocumentStatusUpdated` event.
+> Please note that LHDNM MyInvois does not offer webhook support for document status updates. Therefore, we can regularly check the document status using the `Document Details` service to retrieve the latest status and trigger the `DocumentStatusUpdated` event accordingly.
 
 ## Usage
 
@@ -238,7 +238,7 @@ $uuid = 'JEEA7W331XXXNBAXXX71880XXX';
 $details = MyInvois::document()->details($uuid);
 ```
 
-> As LHDNM MyInvois do not provide any event webhook, you are encourage to call this API after submitting document to get the latest document status. It may take some time for LHDNM to validate your document, so you may need to check from time to time until the document status is `Valid` or `Invalid`.
+> LHDNM MyInvois doesn’t offer webhooks for status updates, so it’s a good idea to call this API after submitting a document to check the latest status. It can take a while for LHDNM to validate the document, so you may need to check every now and then until the status shows `Valid` or `Invalid`.
 
 ### Taxpayer Validation
 
