@@ -11,7 +11,7 @@ class DatePeriod extends AbstractData
     public function __construct(
         public Carbon|string $StartDate,
         public Carbon|string $EndDate,
-        public ?Frequency $Description = Frequency::Monthly,
+        public Frequency|string $Description = Frequency::Monthly,
     ) {
     }
 
@@ -19,7 +19,7 @@ class DatePeriod extends AbstractData
     {
         return match ($name) {
             'StartDate', 'EndDate' => $this->$name instanceof Carbon ? $this->$name?->toDateString() : $this->$name,
-            'Description' => $this->Description?->value,
+            'Description' => $this->$name instanceof Frequency ? $this->Description?->value : $this->$name,
             default => $this->$name
         };
     }
