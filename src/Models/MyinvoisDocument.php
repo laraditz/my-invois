@@ -47,12 +47,12 @@ class MyinvoisDocument extends Model
             'format' => Format::class,
             'status' => DocumentStatus::class,
             'error' => 'json',
-            'accepted_at' => 'timestamp',
-            'rejected_at' => 'timestamp',
-            'issued_at' => 'timestamp',
-            'validated_at' => 'timestamp',
-            'cancel_at' => 'timestamp',
-            'reject_request_at' => 'timestamp',
+            'accepted_at' => 'datetime',
+            'rejected_at' => 'datetime',
+            'issued_at' => 'datetime',
+            'validated_at' => 'datetime',
+            'cancel_at' => 'datetime',
+            'reject_request_at' => 'datetime',
         ];
     }
 
