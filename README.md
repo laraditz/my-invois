@@ -236,6 +236,9 @@ use Laraditz\MyInvois\Facades\MyInvois;
 $uuid = 'JEEA7W331XXXNBAXXX71880XXX';
 // Automatically update the record in myinvois_documents table such as status, long_id etc.
 $details = MyInvois::document()->details($uuid);
+
+// You can also set onbehalfof on request. e.g. when using self-billed invoice
+$details = MyInvois::document(onbehalfof: 'C25845632020')->details($uuid);
 ```
 
 > LHDNM MyInvois doesn’t offer webhooks for status updates, so it’s a good idea to call this API after submitting a document to check the latest status. It can take a while for LHDNM to validate the document, so you may need to check every now and then until the status shows `Valid` or `Invalid`.
@@ -333,7 +336,9 @@ For testing, you can use sandbox mode:
 MYINVOIS_SANDBOX=true
 
 // Or in config (Not recommended)
-'MYINVOIS_SANDBOX' => true
+'sandbox' => [
+    'mode' => true
+]
 ```
 
 ### Certificate and Signature
