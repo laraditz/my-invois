@@ -23,16 +23,26 @@ class MyInvois
     private ?MyInvoisCertificate $certificate = null;
 
     public function __construct(
-        private string $client_id,
-        private string $client_secret,
-        private bool $is_sandbox = false,
+        private ?bool $is_sandbox = null,
+        private ?string $client_id = null,
+        private ?string $client_secret = null,
         private ?string $certificate_path = null,
         private ?string $private_key_path = null,
         private ?string $passphrase = null,
-        private ?string $disk = 'local',
+        private ?string $disk = null,
         private ?string $document_path = null,
         private ?string $on_behalf_of = null,
     ) {
+        $this->setClientId($this->client_id ?? $this->config('client_id'));
+        $this->setClientSecret($this->client_secret ?? $this->config('client_secret'));
+        $this->setIsSandbox($this->is_sandbox ?? $this->config('sandbox.mode'));
+        $this->setCertificatePath($this->certificate_path ?? $this->config('certificate_path'));
+        $this->setPrivateKeyPath($this->private_key_path ?? $this->config('private_key_path'));
+        $this->setPassphrase($this->passphrase ?? $this->config('passphrase'));
+        $this->setDisk($this->disk ?? $this->config('disk') ?? config('filesystems.default'));
+        $this->setDocumentPath($this->document_path ?? $this->config('document_path'));
+        $this->setOnBehalfOf($this->on_behalf_of ?? $this->config('on_behalf_of'));
+
         $this->checkCertificate();
     }
 
@@ -121,9 +131,19 @@ class MyInvois
         return $this->client_id;
     }
 
+    public function setClientId(string $clientId): void
+    {
+        $this->client_id = $clientId;
+    }
+
     public function getClientSecret(): string
     {
         return $this->client_secret;
+    }
+
+    public function setClientSecret(string $clientSecret): void
+    {
+        $this->client_secret = $clientSecret;
     }
 
     public function getOnBehalfOf(): ?string
@@ -131,9 +151,19 @@ class MyInvois
         return $this->on_behalf_of;
     }
 
+    public function setOnBehalfOf(?string $onBehalfOf): void
+    {
+        $this->on_behalf_of = $onBehalfOf;
+    }
+
     public function isSandbox(): bool
     {
         return $this->is_sandbox;
+    }
+
+    public function setIsSandbox(bool $isSandBox): void
+    {
+        $this->is_sandbox = $isSandBox;
     }
 
     public function getCertificatePath(): ?string
@@ -141,7 +171,7 @@ class MyInvois
         return $this->certificate_path;
     }
 
-    private function setCertificatePath(string $certificate_path)
+    private function setCertificatePath(?string $certificate_path)
     {
         $this->certificate_path = $certificate_path;
     }
@@ -151,7 +181,7 @@ class MyInvois
         return $this->private_key_path;
     }
 
-    private function setPrivateKeyPath(string $private_key_path)
+    private function setPrivateKeyPath(?string $private_key_path)
     {
         $this->private_key_path = $private_key_path;
     }
@@ -159,6 +189,11 @@ class MyInvois
     public function getPassphrase(): ?string
     {
         return $this->passphrase;
+    }
+
+    public function setPassphrase(?string $passphrase): void
+    {
+        $this->passphrase = $passphrase;
     }
 
     public function getHashAlgorithm(): string
@@ -171,12 +206,22 @@ class MyInvois
         return $this->document_path;
     }
 
+    public function setDocumentPath(?string $documentPath): void
+    {
+        $this->document_path = $documentPath;
+    }
+
     public function getDisk(): string
     {
         return $this->disk;
     }
 
-    public function config(string $name): array|string|int|bool
+    public function setDisk(string $disk): void
+    {
+        $this->disk = $disk;
+    }
+
+    public function config(string $name): array|string|int|bool|null
     {
         return config('myinvois.' . $name);
     }
@@ -228,12 +273,12 @@ class MyInvois
 
     private function checkCertificate()
     {
-        if ($this->certificate_path && !$this->helper()->isAbsolutePath($this->certificate_path)) {
-            $this->setCertificatePath(base_path($this->certificate_path));
+        if ($this->getCertificatePath() && !$this->helper()->isAbsolutePath($this->getCertificatePath())) {
+            $this->setCertificatePath(base_path($this->getCertificatePath()));
         }
 
-        if ($this->private_key_path && !$this->helper()->isAbsolutePath($this->private_key_path)) {
-            $this->setPrivateKeyPath(base_path($this->private_key_path));
+        if ($this->getPrivateKeyPath() && !$this->helper()->isAbsolutePath($this->getPrivateKeyPath())) {
+            $this->setPrivateKeyPath(base_path($this->getPrivateKeyPath()));
         }
 
         if (
