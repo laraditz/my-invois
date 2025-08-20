@@ -317,6 +317,10 @@ class MyInvois
                 // throw $th;
                 throw new LogicException(__('Please pass a named arguments in :method method.', ['method' => $method]));
             }
+
+            if ($onbehalfof = data_get($arguments, 'onbehalfof')) {
+                $this->setOnBehalfOf($onbehalfof);
+            }
         }
 
         $property_name = Str::of($method)->snake()->lower()->value;

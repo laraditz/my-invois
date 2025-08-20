@@ -88,9 +88,11 @@ class BaseService
 
         $payload = $this->getFinalPayload();
         $savePayload = $this->sanitizePayload();
+        $headers = $this->getHeaders();
 
         $request = MyinvoisRequest::create([
             'client_id' => $this->myInvois->getClientId(),
+            'on_behalf_of' => data_get($headers, 'onbehalfof'),
             'action' => $this->serviceName . '::' . $this->methodName,
             'url' => $url,
             'payload' => $savePayload && count($savePayload) > 0 ? $savePayload : null,
@@ -199,6 +201,10 @@ class BaseService
             if ($accessToken) {
                 $headers['Authorization'] = 'Bearer ' . $accessToken;
             }
+        }
+
+        if ($this->myInvois->getOnBehalfOf()) {
+            $headers['onbehalfof'] = $this->myInvois->getOnBehalfOf();
         }
 
         return $headers;
