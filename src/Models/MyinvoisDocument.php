@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Laraditz\MyInvois\Enums\InvoiceType;
 use Illuminate\Database\Eloquent\Builder;
 use Laraditz\MyInvois\Enums\DocumentStatus;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Laraditz\MyInvois\Observers\MyinvoisDocumentObserver;
@@ -14,6 +15,8 @@ use Laraditz\MyInvois\Observers\MyinvoisDocumentObserver;
 #[ObservedBy([MyinvoisDocumentObserver::class])]
 class MyinvoisDocument extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'client_id',
         'request_id',
