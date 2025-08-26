@@ -8,7 +8,7 @@
 
 Easily integrate with **MyInvois**, the official e-Invoicing platform by **Lembaga Hasil Dalam Negeri Malaysia (LHDNM)**, using this powerful Laravel SDK. MyInvois enables taxpayers to seamlessly submit issued documents to the tax authority and receive real-time updates on document statuses.
 
-This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices—helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
+This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices, helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
 
 > [!WARNING]  
 > This SDK is still actively under development and may contain bugs. Use at your own risk.
