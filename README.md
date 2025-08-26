@@ -155,6 +155,16 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 | -------------------- | --------------------------------------- | --------------------------------- | ----------- |
 | `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
 
+## Event
+
+This package also provide an event to allow your application to listen for MyInvois events. You can create your listener and register it under event below.
+
+| Event                                          | Description                              |
+| ---------------------------------------------- | ---------------------------------------- |
+| Laraditz\MyInvois\Events\DocumentStatusUpdated | Trigger whenever document status updated |
+
+> Please note that LHDNM MyInvois does not offer webhook support for document status updates. Therefore, we can regularly check the document status using the `Document Details` service to retrieve the latest status and trigger the `DocumentStatusUpdated` event accordingly.
+
 ## Usage
 
 ### Basic Authentication
@@ -226,7 +236,12 @@ use Laraditz\MyInvois\Facades\MyInvois;
 $uuid = 'JEEA7W331XXXNBAXXX71880XXX';
 // Automatically update the record in myinvois_documents table such as status, long_id etc.
 $details = MyInvois::document()->details($uuid);
+
+// You can also set onbehalfof on request. e.g. when using self-billed invoice
+$details = MyInvois::document(onbehalfof: 'C25845632020')->details($uuid);
 ```
+
+> LHDNM MyInvois doesn’t offer webhooks for status updates, so it’s a good idea to call this API after submitting a document to check the latest status. It can take a while for LHDNM to validate the document, so you may need to check every now and then until the status shows `Valid` or `Invalid`.
 
 ### Taxpayer Validation
 
@@ -321,7 +336,9 @@ For testing, you can use sandbox mode:
 MYINVOIS_SANDBOX=true
 
 // Or in config (Not recommended)
-'MYINVOIS_SANDBOX' => true
+'sandbox' => [
+    'mode' => true
+]
 ```
 
 ### Certificate and Signature
@@ -554,6 +571,7 @@ This package will create the following tables when migration is run:
 - `myinvois_documents` - Store submitted documents
 - `myinvois_document_histories` - Store previously submitted documents
 - `myinvois_msic_codes` - Store MSIC codes
+- `myinvois_measure_units` - Store measure units
 
 ### Exception Handling
 

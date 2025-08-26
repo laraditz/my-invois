@@ -7,11 +7,11 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class PostalAddress extends AbstractData
 {
     public function __construct(
-        public string $CityName,
-        public string $PostalZone,
-        public string $CountrySubentityCode,
-        public array $AddressLine,
-        public Country $Country,
+        public ?string $CityName = null,
+        public ?string $PostalZone = null,
+        public ?string $CountrySubentityCode = null,
+        public ?array $AddressLine = null,
+        public ?Country $Country = null,
     ) {
     }
 

@@ -12,6 +12,7 @@ class MyinvoisRequest extends Model
 
     protected $fillable = [
         'client_id',
+        'on_behalf_of',
         'action',
         'url',
         'payload',

@@ -7,8 +7,8 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class Delivery extends AbstractData
 {
     public function __construct(
-        public DeliveryParty $DeliveryParty,
-        public Shipment $Shipment,
+        public ?DeliveryParty $DeliveryParty = null,
+        public ?Shipment $Shipment = null,
     ) {
     }
 

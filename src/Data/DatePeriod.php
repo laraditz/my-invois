@@ -9,17 +9,17 @@ use Laraditz\MyInvois\Enums\Frequency;
 class DatePeriod extends AbstractData
 {
     public function __construct(
-        public Carbon $StartDate,
-        public Carbon $EndDate,
-        public ?Frequency $Description = Frequency::Monthly,
+        public Carbon|string $StartDate,
+        public Carbon|string $EndDate,
+        public Frequency|string $Description = Frequency::Monthly,
     ) {
     }
 
     public function getValue(string $name): mixed
     {
         return match ($name) {
-            'StartDate', 'EndDate' => $this->$name?->toDateString(),
-            'Description' => $this->Description?->value,
+            'StartDate', 'EndDate' => $this->$name instanceof Carbon ? $this->$name?->toDateString() : $this->$name,
+            'Description' => $this->$name instanceof Frequency ? $this->Description?->value : $this->$name,
             default => $this->$name
         };
     }

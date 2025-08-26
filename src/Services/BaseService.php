@@ -88,9 +88,11 @@ class BaseService
 
         $payload = $this->getFinalPayload();
         $savePayload = $this->sanitizePayload();
+        $headers = $this->getHeaders();
 
         $request = MyinvoisRequest::create([
             'client_id' => $this->myInvois->getClientId(),
+            'on_behalf_of' => data_get($headers, 'onbehalfof'),
             'action' => $this->serviceName . '::' . $this->methodName,
             'url' => $url,
             'payload' => $savePayload && count($savePayload) > 0 ? $savePayload : null,
@@ -201,6 +203,10 @@ class BaseService
             }
         }
 
+        if ($this->myInvois->getOnBehalfOf()) {
+            $headers['onbehalfof'] = $this->myInvois->getOnBehalfOf();
+        }
+
         return $headers;
     }
 
@@ -226,9 +232,9 @@ class BaseService
             if (is_array($params)) {
                 $mappedParams = collect($params)->mapWithKeys(fn($value, $key) => ["{" . $key . "}" => $value]);
 
-                $route_path = Str::swap($mappedParams->toArray(), $route);
+                $route_path = Str::swap($mappedParams->toArray(), $route_path);
             } elseif (is_string($params) || is_numeric($params)) {
-                $route_path = str_replace('{id}', $params, $route);
+                $route_path = str_replace('{id}', $params, $route_path);
             }
         }
 

@@ -9,7 +9,7 @@ class SignatureInformation extends AbstractData
     public function __construct(
         public ?string $ID = 'urn:oasis:names:specification:ubl:signature:1',
         public ?string $ReferencedSignatureID = 'urn:oasis:names:specification:ubl:signature:Invoice',
-        public ?Signature $Signature,
+        public ?Signature $Signature = null,
     ) {
     }
 

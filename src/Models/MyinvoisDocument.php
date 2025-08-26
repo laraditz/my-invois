@@ -2,15 +2,21 @@
 
 namespace Laraditz\MyInvois\Models;
 
-use Laraditz\MyInvois\Enums\DocumentStatus;
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Database\Eloquent\Model;
 use Laraditz\MyInvois\Enums\InvoiceType;
 use Illuminate\Database\Eloquent\Builder;
+use Laraditz\MyInvois\Enums\DocumentStatus;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Laraditz\MyInvois\Observers\MyinvoisDocumentObserver;
 
+#[ObservedBy([MyinvoisDocumentObserver::class])]
 class MyinvoisDocument extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'client_id',
         'request_id',
@@ -44,12 +50,12 @@ class MyinvoisDocument extends Model
             'format' => Format::class,
             'status' => DocumentStatus::class,
             'error' => 'json',
-            'accepted_at' => 'timestamp',
-            'rejected_at' => 'timestamp',
-            'issued_at' => 'timestamp',
-            'validated_at' => 'timestamp',
-            'cancel_at' => 'timestamp',
-            'reject_request_at' => 'timestamp',
+            'accepted_at' => 'datetime',
+            'rejected_at' => 'datetime',
+            'issued_at' => 'datetime',
+            'validated_at' => 'datetime',
+            'cancel_at' => 'datetime',
+            'reject_request_at' => 'datetime',
         ];
     }
 

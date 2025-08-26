@@ -8,7 +8,7 @@ class Item extends AbstractData
 {
     public function __construct(
         public string $Description,
-        public OriginCountry $OriginCountry,
+        public ?OriginCountry $OriginCountry = null,
         public ?array $CommodityClassification = null,
 
     ) {

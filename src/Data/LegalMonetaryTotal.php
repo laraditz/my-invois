@@ -7,13 +7,13 @@ use Laraditz\MyInvois\Enums\XMLNS;
 class LegalMonetaryTotal extends AbstractData
 {
     public function __construct(
-        public Data|Money $LineExtensionAmount,
-        public Data|Money $TaxExclusiveAmount,
-        public Data|Money $TaxInclusiveAmount,
-        public Data|Money $AllowanceTotalAmount,
-        public Data|Money $ChargeTotalAmount,
-        public Data|Money $PayableRoundingAmount,
-        public Data|Money $PayableAmount,
+        public Data|Money|null $LineExtensionAmount = null,
+        public Data|Money|null $TaxExclusiveAmount = null,
+        public Data|Money|null $TaxInclusiveAmount = null,
+        public Data|Money|null $AllowanceTotalAmount = null,
+        public Data|Money|null $ChargeTotalAmount = null,
+        public Data|Money|null $PayableRoundingAmount = null,
+        public Data|Money|null $PayableAmount = null,
     ) {
     }
 

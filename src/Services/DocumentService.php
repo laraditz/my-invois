@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Enums\Format;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Builder;
 use Laraditz\MyInvois\Enums\DocumentStatus;
 use Laraditz\MyInvois\Models\MyinvoisRequest;
 use Laraditz\MyInvois\Models\MyinvoisDocument;
@@ -35,7 +36,10 @@ class DocumentService extends BaseService
                 $existingDocument = MyinvoisDocument::query()
                     ->where('client_id', $this->myInvois->getClientId())
                     ->where('code_number', $codeNumber)
-                    ->isAccepted()
+                    ->where(function (Builder $query) {
+                        $query->whereNull('status')
+                            ->orWhere('status', DocumentStatus::Valid);
+                    })
                     ->count();
 
                 if ($existingDocument > 0) {
@@ -122,20 +126,17 @@ class DocumentService extends BaseService
                     'rejected_at' => null,
                 ];
 
-                if (!$myInvoisDocument) {
-                    $myInvoisDocument = MyinvoisDocument::create([
-                        ...[
-                            'client_id' => $client_id,
-                            'code_number' => $codeNumber,
-                        ],
-                        ...$updateData
-                    ]);
-                } else {
-                    // Add to histories table before replacing
-                    $this->addHistory($myInvoisDocument);
-
-                    $myInvoisDocument = tap($myInvoisDocument)->update($updateData);
+                if ($myInvoisDocument) {
+                    $myInvoisDocument->delete();
                 }
+
+                $myInvoisDocument = MyinvoisDocument::create([
+                    ...[
+                        'client_id' => $client_id,
+                        'code_number' => $codeNumber,
+                    ],
+                    ...$updateData
+                ]);
             }
         }
     }
@@ -237,6 +238,23 @@ class DocumentService extends BaseService
                 'status_reason' => $documentStatusReason,
             ]);
         }
+    }
+
+    public function beforeCancelRequest()
+    {
+        $payload = $this->getPayload();
+        $params = $this->getParams();
+        $uuid = null;
+
+        if (count($payload) > 0) {
+            $uuid = data_get($payload, 0) ?? data_get($payload, 'uuid');
+
+            if ($uuid) {
+                $this->setParams(['uuid' => $uuid]);
+            }
+        }
+
+        throw_if(!($uuid || data_get($params, 'uuid')), MyInvoisException::class, __('Missing uuid parameter.'));
     }
 
     private function addHistory(MyinvoisDocument $myInvoisDocument): void
