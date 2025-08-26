@@ -2,6 +2,34 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.0.9 - 2025-08-26
+
+### Added
+
+- Add soft delete functionality to `myinvois_documents` table.
+- Add `on_behalf_of` field to `myinvois_requests` table for intermediary system support.
+- Add `DocumentStatusUpdated` event for better document lifecycle tracking.
+
+### Changed
+
+- Make all constructor parameters optional in main classes for better flexibility.
+- Update `DatePeriod` data class to support both enum and string frequency values.
+- Update `DatePeriod` to support string date format.
+- Make postal address parameters nullable in `PostalAddress` data class.
+- Update `LegalMonetaryTotal` data structure and parameter ordering.
+- Update `Item` data class structure.
+- Make delivery party nullable in delivery-related data structures.
+- Convert document timestamp casting from timestamp to datetime format.
+
+### Fixed
+
+- Fix bug in route path configuration.
+- Fix deprecated optional parameter warnings.
+
+### Removed
+
+- Remove `addHistory` method and replace with soft delete functionality for better data management.
+
 ## 0.0.8 - 2025-07-17
 
 ### Added
