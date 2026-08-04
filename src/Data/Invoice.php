@@ -4,8 +4,9 @@ namespace Laraditz\MyInvois\Data;
 
 use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Enums\XMLNS;
+use Laraditz\MyInvois\Contracts\UblDocument;
 
-class Invoice extends AbstractData
+class Invoice extends AbstractData implements UblDocument
 {
     public function __construct(
         public ?UBLExtensions $UBLExtensions = null,
@@ -61,5 +62,15 @@ class Invoice extends AbstractData
     public function getInvoiceTypeCode()
     {
         return $this->InvoiceTypeCode?->value;
+    }
+
+    public function getRootElement(): string
+    {
+        return 'Invoice';
+    }
+
+    public function getDocumentNamespace(): string
+    {
+        return 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2';
     }
 }
