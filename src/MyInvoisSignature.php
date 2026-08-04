@@ -6,7 +6,7 @@ use Illuminate\Support\Carbon;
 use Laraditz\MyInvois\Data\Cert;
 use Laraditz\MyInvois\Data\Data;
 use Laraditz\MyInvois\Enums\XMLNS;
-use Laraditz\MyInvois\Data\Invoice;
+use Laraditz\MyInvois\Contracts\UblDocument;
 use Laraditz\MyInvois\Data\KeyInfo;
 use Laraditz\MyInvois\Data\X509Data;
 use Laraditz\MyInvois\Data\Reference;
@@ -58,7 +58,7 @@ class MyInvoisSignature
     private ?string $serialNumber = null;
 
     public function __construct(
-        public Invoice $document,
+        public UblDocument $document,
         private MyInvoisCertificate $certificate,
     ) {
         $this->helper = new MyInvoisHelper();
@@ -69,8 +69,8 @@ class MyInvoisSignature
     private function prepare()
     {
         // Step 2: Apply transformations to the document
-        $service = $this->helper->createInvoiceXMLService();
-        $xml = $this->helper->writeXml($service, 'Invoice', $this->document->toXmlArray());
+        $service = $this->helper->createDocumentXMLService($this->document->getDocumentNamespace());
+        $xml = $this->helper->writeXml($service, $this->document->getRootElement(), $this->document->toXmlArray());
         $xml = $this->helper->removeXMLTag($xml);
         // $this->helper->displayXml($xml);
 

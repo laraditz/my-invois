@@ -10,8 +10,13 @@ class MyInvoisHelper
 {
     public function createInvoiceXMLService(): Service
     {
+        return $this->createDocumentXMLService('urn:oasis:names:specification:ubl:schema:xsd:Invoice-2');
+    }
+
+    public function createDocumentXMLService(string $namespace): Service
+    {
         $namespaces = [
-            'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2' => '',
+            $namespace => '',
             XMLNS::CAC->getNamespace() => XMLNS::CAC(),
             XMLNS::CBC->getNamespace() => XMLNS::CBC(),
         ];
