@@ -232,6 +232,8 @@ $result = MyInvois::document()->submit(
 
 A Debit Note adjusts the amount owed on an invoice that has already been submitted and validated by MyInvois - the original invoice can't be edited once accepted, so a Debit Note is issued to increase the amount instead. It uses `DebitNote` (LHDN type code `03`), or `SelfBilledDebitNote` (code `13`) when your system issues it on behalf of the supplier.
 
+> See [docs/debit-note.md](docs/debit-note.md) for a complete end-to-end example (submitting the original invoice, then a Debit Note against it), the Self-Billed variant, and pitfalls to watch for.
+
 `DebitNote` accepts the same fields as `Invoice`, plus `BillingReference` to link back to the original document. Set it manually - the package does not look this up for you:
 
 ```php
