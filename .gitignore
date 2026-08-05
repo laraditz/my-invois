@@ -1,2 +1,5 @@
 /vendor
 /CLAUDE.md
+/docs/iris-ai
+/coverage
+.phpunit.result.cache

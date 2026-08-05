@@ -2,6 +2,25 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.1.0 - 2026-08-05
+
+### Added
+
+- Add `DebitNote` data class (LHDN type code `03`) for adjusting the amount on an already-submitted, validated invoice.
+- Add `SelfBilledDebitNote` data class (LHDN type code `13`) for debit notes issued on behalf of the supplier.
+- Add `UblDocument` contract defining the shape of a submittable document (root element, namespace, code number, invoice type code).
+- Add `getRootElement()` and `getDocumentNamespace()` methods to `Invoice` data class.
+- Add `MyInvoisHelper::createDocumentXMLService()` method for resolving a document's XML namespace generically.
+- Add automated test suite (PHPUnit + Orchestra Testbench) - the package's first, covering the document generation and signing pipeline.
+- Add `docs/invoice.md` and `docs/debit-note.md` complete, end-to-end usage guides.
+
+### Changed
+
+- Widen `MyInvois::generateDocument()` and `generateXMLDocument()` to accept any `UblDocument`, not just `Invoice`, so other document types can share the same generation pipeline.
+- Widen `MyInvoisSignature`'s document property to accept any `UblDocument` - signing now resolves root element and namespace from the document itself instead of assuming `Invoice`.
+- `MyInvoisHelper::createInvoiceXMLService()` now delegates to `createDocumentXMLService()`; behavior is unchanged.
+- Update `README.md` with Debit Note usage and links to the new `/docs` guides.
+
 ## 0.0.9 - 2025-08-26
 
 ### Added

@@ -8,7 +8,7 @@
 
 Easily integrate with **MyInvois**, the official e-Invoicing platform by **Lembaga Hasil Dalam Negeri Malaysia (LHDNM)**, using this powerful Laravel SDK. MyInvois enables taxpayers to seamlessly submit issued documents to the tax authority and receive real-time updates on document statuses.
 
-This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices—helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
+This package provides a clean, object-oriented interface for creating, managing, and sending e-Invoices, helping you stay compliant with Malaysia’s digital tax regulations while keeping your codebase elegant and maintainable.
 
 > [!WARNING]  
 > This SDK is still actively under development and may contain bugs. Use at your own risk.
@@ -153,7 +153,7 @@ Below are all methods available under this SDK. Refer to [Platform API](https://
 
 | Method               | Description                             | Parameters                        | Return type |
 | -------------------- | --------------------------------------- | --------------------------------- | ----------- |
-| `generateDocument()` | Generate document in XML or JSON format | `Invoice $data`, `Format $format` | `string`    |
+| `generateDocument()` | Generate document in XML or JSON format | `UblDocument $data`, `Format $format` | `string`    |
 
 ## Event
 
@@ -227,6 +227,66 @@ $result = MyInvois::document()->submit(
     format: Format::XML
 );
 ```
+
+> See [docs/invoice.md](docs/invoice.md) for a complete, fully-populated example (parties, line items, tax totals), the Self-Billed Invoice variant, and status polling.
+
+### Debit Note Submission
+
+A Debit Note adjusts the amount owed on an invoice that has already been submitted and validated by MyInvois - the original invoice can't be edited once accepted, so a Debit Note is issued to increase the amount instead. It uses `DebitNote` (LHDN type code `03`), or `SelfBilledDebitNote` (code `13`) when your system issues it on behalf of the supplier.
+
+> See [docs/debit-note.md](docs/debit-note.md) for a complete end-to-end example (submitting the original invoice, then a Debit Note against it), the Self-Billed variant, and pitfalls to watch for.
+
+`DebitNote` accepts the same fields as `Invoice`, plus `BillingReference` to link back to the original document. Set it manually - the package does not look this up for you:
+
+```php
+use Laraditz\MyInvois\Facades\MyInvois;
+use Laraditz\MyInvois\Data\BillingReference;
+use Laraditz\MyInvois\Data\DebitNote;
+use Laraditz\MyInvois\Data\InvoiceDocumentReference;
+use Laraditz\MyInvois\Data\InvoiceTypeCode;
+use Laraditz\MyInvois\Enums\Format;
+
+// Create DebitNote object, referencing the original invoice
+$debitNote = new DebitNote(
+    ID: 'DN-001',
+    IssueDate: now(),
+    IssueTime: now(),
+    InvoiceTypeCode: new InvoiceTypeCode('03'), // Debit Note
+    DocumentCurrencyCode: 'MYR',
+    BillingReference: [
+        new BillingReference(
+            InvoiceDocumentReference: [
+                new InvoiceDocumentReference(
+                    ID: 'INV-001',                                  // original invoice's internal ID
+                    UUID: 'JEEA7W331XXXNBAXXX71880XXX',              // original invoice's MyInvois UUID
+                ),
+            ],
+        ),
+    ],
+    // ... add other required data
+);
+
+// Submit document - same submit() call as Invoice
+$result = MyInvois::document()->submit(
+    documents: [$debitNote],
+    format: Format::XML
+);
+```
+
+For a self-billed Debit Note, use `SelfBilledDebitNote` with type code `13` instead - everything else is identical:
+
+```php
+use Laraditz\MyInvois\Data\SelfBilledDebitNote;
+
+$selfBilledDebitNote = new SelfBilledDebitNote(
+    ID: 'DN-002',
+    InvoiceTypeCode: new InvoiceTypeCode('13'), // Self-Billed Debit Note
+    // ... same fields as DebitNote, including BillingReference
+);
+```
+
+> [!NOTE]
+> The dedup check that skips already-submitted documents is keyed by `client_id` + the document's `ID` only, not by document type. Use a distinct `ID`/code-number sequence per document type (e.g. `INV-` for invoices, `DN-` for debit notes) so a Debit Note's `ID` never collides with an Invoice's.
 
 ### Document Details
 
@@ -506,6 +566,8 @@ try {
 This package supports UBL (Universal Business Language) data structures for e-invoice:
 
 - **Invoice**: Main invoice document
+- **DebitNote**: Debit note document, for adjusting an already-submitted invoice's amount
+- **SelfBilledDebitNote**: Debit note issued on behalf of the supplier
 - **Party**: Supplier and customer information
 - **Address**: Postal address
 - **Contact**: Contact information
@@ -620,7 +682,7 @@ try {
 - [ ] Add complete example for creating invoice
 - [ ] Convert some enum into DB table + seeder?
 - [ ] Add documentation
-- [ ] Add test
+- [x] Add test
 
 ### Testing
 

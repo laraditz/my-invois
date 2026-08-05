@@ -6,7 +6,7 @@ use DOMDocument;
 use LogicException;
 use BadMethodCallException;
 use Illuminate\Support\Str;
-use Laraditz\MyInvois\Data\Invoice;
+use Laraditz\MyInvois\Contracts\UblDocument;
 use Laraditz\MyInvois\Enums\Format;
 use Laraditz\MyInvois\Models\MyinvoisAccessToken;
 use Laraditz\MyInvois\Exceptions\MyInvoisApiError;
@@ -74,7 +74,7 @@ class MyInvois
         }
     }
 
-    public function generateDocument(Invoice $data, Format $format): string
+    public function generateDocument(UblDocument $data, Format $format): string
     {
         return match ($format) {
             Format::XML => $this->generateXMLDocument(data: $data),
@@ -82,10 +82,10 @@ class MyInvois
         };
     }
 
-    public function generateXMLDocument(Invoice $data): string
+    public function generateXMLDocument(UblDocument $data): string
     {
         $helper = new MyInvoisHelper();
-        $service = $helper->createInvoiceXMLService();
+        $service = $helper->createDocumentXMLService($data->getDocumentNamespace());
 
         if ($this->hasSignature === true) {
 
@@ -102,7 +102,7 @@ class MyInvois
             $data->InvoiceTypeCode?->attributes(['listVersionID' => '1.0']);
         }
 
-        $content = $helper->writeXml($service, 'Invoice', $data->toXmlArray());
+        $content = $helper->writeXml($service, $data->getRootElement(), $data->toXmlArray());
 
         $dom = $this->helper()->createDOM();
         $dom->loadXML($content);
@@ -114,7 +114,7 @@ class MyInvois
     }
 
     // in progress
-    public function generateJSONDocument(Invoice $data)
+    public function generateJSONDocument(UblDocument $data)
     {
 
     }
