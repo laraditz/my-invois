@@ -9,7 +9,7 @@ This package supports two Debit Note types:
 | `DebitNote` | `03` | You're adjusting your own previously-submitted invoice |
 | `SelfBilledDebitNote` | `13` | Your system issues the Debit Note on behalf of the supplier |
 
-Both classes accept the exact same fields as `Invoice` — `DebitNote` extends `Invoice` directly, so anything you already know about building an `Invoice` (parties, lines, tax totals, monetary totals) applies unchanged. The one addition that matters here is `BillingReference`, which links the Debit Note back to the original invoice.
+Both classes accept the exact same fields as `Invoice` — `DebitNote` extends `Invoice` directly, so anything you already know about building an `Invoice` (parties, lines, tax totals, monetary totals) applies unchanged; see [docs/invoice.md](invoice.md) if you haven't built one before. The one addition that matters here is `BillingReference`, which links the Debit Note back to the original invoice.
 
 ## Contents
 
@@ -43,7 +43,7 @@ The `UUID` is what MyInvois assigns after the original invoice is accepted — y
 
 ## Complete Example: Invoice, Then a Debit Note Against It
 
-This mirrors the [Complete Example](../README.md#complete-example-creating-and-submitting-invoice) in the README, extended to show the realistic end-to-end flow: submit an invoice, then later submit a Debit Note correcting it.
+This extends the [Invoice complete example](invoice.md#complete-example) to show the realistic end-to-end flow: submit an invoice, then later submit a Debit Note correcting it.
 
 ```php
 use Laraditz\MyInvois\Facades\MyInvois;
