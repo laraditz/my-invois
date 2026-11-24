@@ -14,17 +14,21 @@ An Invoice is the standard e-Invoice document type - LHDN type code `01`. This g
 
 ## Self-Billed Invoice
 
-Unlike Debit Note, there's no separate `SelfBilledInvoice` class - self-billing an Invoice only changes two things:
+Unlike Debit Note, there's no separate `SelfBilledInvoice` class - self-billing an Invoice only changes the type code:
 
 - `InvoiceTypeCode` is `new InvoiceTypeCode('11')` (Self-Billed Invoice) instead of `'01'`
-- You set `onbehalfof` on the submission call, since your system is issuing it on behalf of the supplier's TIN:
+
+In self-billing the **buyer** issues the e-Invoice, with the supplier in `AccountingSupplierParty` and the buyer in `AccountingCustomerParty`. You submit it under your own credentials, like any other document - **don't** set `onbehalfof`:
 
 ```php
-$result = MyInvois::document(onbehalfof: 'C25845632020')->submit(
+$result = MyInvois::document()->submit(
     documents: [$invoice],
     format: Format::XML
 );
 ```
+
+> [!WARNING]
+> `onbehalfof` logs in as an intermediary for the taxpayer whose TIN you pass, so the access token is scoped to that taxpayer. Passing the supplier's TIN here would submit the document as the supplier, not as you the issuer, and it requires the supplier to have authorised you as an intermediary on the MyInvois portal. Only use it when you really are submitting on behalf of another taxpayer who is the issuer.
 
 Everything else - building the `Invoice` object itself - is identical to a standard invoice.
 

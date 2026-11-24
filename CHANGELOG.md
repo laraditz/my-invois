@@ -2,6 +2,12 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- Correct the self-billed guidance in `docs/invoice.md`, `docs/debit-note.md` and `README.md`: self-billed documents are issued by the buyer under its own credentials, so they're submitted without `onbehalfof`. Setting it to the supplier's TIN logs in as an intermediary for the supplier and submits the document as them.
+
 ## 0.1.1 - 2026-11-25
 
 ### Fixed
