@@ -47,12 +47,13 @@ class AuthService extends BaseService
             }
 
             if ($client) {
-                $client->accessToken()->updateOrCreate([], [
+                // One token per client and taxpayer, so fetching a token on behalf
+                // of a taxpayer never overwrites the client's own token (or another's).
+                $client->accessToken()->updateOrCreate(['on_behalf_of' => $onbehalfof ?: null], [
                     'access_token' => $access_token,
                     'expires_at' => now()->addSeconds($expires_in),
                     'type' => $token_type,
                     'scopes' => $scope,
-                    'on_behalf_of' => $onbehalfof
                 ]);
             }
         });

@@ -61,8 +61,6 @@ class BaseService
                 $this->setPayload($arguments);
             }
 
-            $this->client = $this->getClient();
-
             return $this->execute();
         }
 
@@ -76,6 +74,10 @@ class BaseService
     protected function execute()
     {
         $this->beforeRequest();
+
+        // Built after the before hooks so headers they add (e.g. onbehalfof on
+        // the token request) are sent.
+        $this->client = $this->getClient();
 
         $this->setRouteFromConfig($this->fqcn, $this->methodName); // set final URL
         $method = $this->getMethod();
@@ -428,7 +430,9 @@ class BaseService
     private function getClient()
     {
         if ($this instanceof AuthService) {
-            return Http::asForm();
+            // Form-encoded body; only onbehalfof is carried over so the JSON
+            // Content-Type default header doesn't override asForm().
+            return Http::asForm()->withHeaders(Arr::only($this->getHeaders(), ['onbehalfof']));
         } else {
             return Http::withHeaders($this->getHeaders());
         }

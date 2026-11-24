@@ -2,6 +2,13 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.1.1 - 2026-11-25
+
+### Fixed
+
+- Cache access tokens per client **and** `on_behalf_of`. `getAccessToken()` previously returned any unexpired token for the client, so a token for one taxpayer could be reused for the client's own calls or another taxpayer's, and fetching a token overwrote the client's only cached token.
+- Send the `onbehalfof` header on the token request. The HTTP client was built before `AuthService::beforeTokenRequest()` added it, and `asForm()` carried no headers, so intermediary logins were silently issued the client's own token.
+
 ## 0.1.0 - 2026-08-05
 
 ### Added

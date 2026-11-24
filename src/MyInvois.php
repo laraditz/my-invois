@@ -48,8 +48,17 @@ class MyInvois
 
     public function getAccessToken(): ?string
     {
+        // A token issued on behalf of a taxpayer is scoped to that taxpayer, so
+        // only reuse one issued for the same on_behalf_of (null = own token).
+        $onBehalfOf = $this->getOnBehalfOf();
+
         $accessTokenModel = MyinvoisAccessToken::query()
             ->where('client_id', $this->getClientId())
+            ->when(
+                $onBehalfOf,
+                fn ($query) => $query->where('on_behalf_of', $onBehalfOf),
+                fn ($query) => $query->whereNull('on_behalf_of'),
+            )
             ->hasNotExpired()
             ->first();
 
