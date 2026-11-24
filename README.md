@@ -232,7 +232,7 @@ $result = MyInvois::document()->submit(
 
 ### Debit Note Submission
 
-A Debit Note adjusts the amount owed on an invoice that has already been submitted and validated by MyInvois - the original invoice can't be edited once accepted, so a Debit Note is issued to increase the amount instead. It uses `DebitNote` (LHDN type code `03`), or `SelfBilledDebitNote` (code `13`) when your system issues it on behalf of the supplier.
+A Debit Note adjusts the amount owed on an invoice that has already been submitted and validated by MyInvois - the original invoice can't be edited once accepted, so a Debit Note is issued to increase the amount instead. It uses `DebitNote` (LHDN type code `03`), or `SelfBilledDebitNote` (code `13`) when you're the buyer adjusting a self-billed invoice you issued.
 
 > See [docs/debit-note.md](docs/debit-note.md) for a complete end-to-end example (submitting the original invoice, then a Debit Note against it), the Self-Billed variant, and pitfalls to watch for.
 
@@ -297,7 +297,8 @@ $uuid = 'JEEA7W331XXXNBAXXX71880XXX';
 // Automatically update the record in myinvois_documents table such as status, long_id etc.
 $details = MyInvois::document()->details($uuid);
 
-// You can also set onbehalfof on request. e.g. when using self-billed invoice
+// When acting as an intermediary for another taxpayer, set onbehalfof to their TIN.
+// Not for self-billed documents - those are issued, and checked, under your own credentials.
 $details = MyInvois::document(onbehalfof: 'C25845632020')->details($uuid);
 ```
 
@@ -567,7 +568,7 @@ This package supports UBL (Universal Business Language) data structures for e-in
 
 - **Invoice**: Main invoice document
 - **DebitNote**: Debit note document, for adjusting an already-submitted invoice's amount
-- **SelfBilledDebitNote**: Debit note issued on behalf of the supplier
+- **SelfBilledDebitNote**: Debit note issued by the buyer against a self-billed invoice
 - **Party**: Supplier and customer information
 - **Address**: Postal address
 - **Contact**: Contact information
