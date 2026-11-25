@@ -8,19 +8,19 @@ use Laraditz\MyInvois\Tests\TestCase;
 
 class DebitNoteTest extends TestCase
 {
-    public function test_it_reports_its_root_element()
+    public function test_it_uses_the_invoice_root_element()
     {
         $debitNote = new DebitNote();
 
-        $this->assertSame('DebitNote', $debitNote->getRootElement());
+        $this->assertSame('Invoice', $debitNote->getRootElement());
     }
 
-    public function test_it_reports_its_document_namespace()
+    public function test_it_uses_the_invoice_document_namespace()
     {
         $debitNote = new DebitNote();
 
         $this->assertSame(
-            'urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2',
+            'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2',
             $debitNote->getDocumentNamespace()
         );
     }

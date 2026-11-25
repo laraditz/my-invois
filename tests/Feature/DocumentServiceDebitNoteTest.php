@@ -40,7 +40,9 @@ class DocumentServiceDebitNoteTest extends TestCase
 
         $this->assertSame('DN-100', $document['codeNumber']);
         $this->assertSame('03', $document['invoiceType']);
-        $this->assertStringContainsString('<DebitNote', base64_decode($document['document']));
+        $xml = base64_decode($document['document']);
+        $this->assertStringContainsString('<Invoice', $xml);
+        $this->assertStringContainsString('xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"', $xml);
     }
 
     public function test_it_skips_a_debit_note_that_already_has_a_pending_document_record()
