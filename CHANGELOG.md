@@ -2,7 +2,7 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
-## Unreleased
+## 0.1.2 - 2026-11-25
 
 ### Fixed
 
