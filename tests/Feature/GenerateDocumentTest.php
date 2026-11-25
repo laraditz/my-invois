@@ -29,7 +29,7 @@ class GenerateDocumentTest extends TestCase
         );
     }
 
-    public function test_it_generates_debit_note_xml_with_debit_note_root_element()
+    public function test_it_generates_debit_note_xml_with_invoice_root_element()
     {
         $debitNote = new DebitNote(
             ID: 'DN-001',
@@ -40,14 +40,15 @@ class GenerateDocumentTest extends TestCase
 
         $xml = $myInvois->generateXMLDocument($debitNote);
 
-        $this->assertStringContainsString('<DebitNote', $xml);
+        $this->assertStringContainsString('<Invoice', $xml);
+        $this->assertStringNotContainsString('DebitNote', $xml);
         $this->assertStringContainsString(
-            'xmlns="urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2"',
+            'xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"',
             $xml
         );
     }
 
-    public function test_it_generates_self_billed_debit_note_xml_with_debit_note_root_element()
+    public function test_it_generates_self_billed_debit_note_xml_with_invoice_root_element()
     {
         $selfBilledDebitNote = new SelfBilledDebitNote(
             ID: 'DN-002',
@@ -58,9 +59,10 @@ class GenerateDocumentTest extends TestCase
 
         $xml = $myInvois->generateXMLDocument($selfBilledDebitNote);
 
-        $this->assertStringContainsString('<DebitNote', $xml);
+        $this->assertStringContainsString('<Invoice', $xml);
+        $this->assertStringNotContainsString('DebitNote', $xml);
         $this->assertStringContainsString(
-            'xmlns="urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2"',
+            'xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"',
             $xml
         );
     }

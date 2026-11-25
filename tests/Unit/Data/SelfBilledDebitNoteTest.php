@@ -19,9 +19,9 @@ class SelfBilledDebitNoteTest extends TestCase
     {
         $selfBilledDebitNote = new SelfBilledDebitNote();
 
-        $this->assertSame('DebitNote', $selfBilledDebitNote->getRootElement());
+        $this->assertSame('Invoice', $selfBilledDebitNote->getRootElement());
         $this->assertSame(
-            'urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2',
+            'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2',
             $selfBilledDebitNote->getDocumentNamespace()
         );
     }

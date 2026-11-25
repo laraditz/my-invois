@@ -2,6 +2,16 @@
 
 All notable changes to `laraditz/my-invois` will be documented in this file
 
+## 0.1.2 - 2026-11-25
+
+### Fixed
+
+- Generate `DebitNote` and `SelfBilledDebitNote` with the `<Invoice>` root element and the `Invoice-2` namespace. MyInvois validates every document type against the UBL Invoice schema and uses `InvoiceTypeCode` (`03` / `13`) to tell them apart, so the previous `<DebitNote>` root (`DebitNote-2`) was rejected with "Could not find schema information for the element ...DebitNote-2:DebitNote". See the [Debit Note v1.2 spec](https://sdk.myinvois.hasil.gov.my/documents/debit-v1-2/).
+
+### Changed
+
+- Correct the self-billed guidance in `docs/invoice.md`, `docs/debit-note.md` and `README.md`: self-billed documents are issued by the buyer under its own credentials, so they're submitted without `onbehalfof`. Setting it to the supplier's TIN logs in as an intermediary for the supplier and submits the document as them.
+
 ## 0.1.1 - 2026-11-25
 
 ### Fixed

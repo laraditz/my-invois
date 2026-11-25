@@ -7,7 +7,7 @@ This package supports two Debit Note types:
 | Class | LHDN Type Code | Use when |
 |---|---|---|
 | `DebitNote` | `03` | You're adjusting your own previously-submitted invoice |
-| `SelfBilledDebitNote` | `13` | Your system issues the Debit Note on behalf of the supplier |
+| `SelfBilledDebitNote` | `13` | You're the buyer, adjusting a self-billed invoice you issued for your supplier |
 
 Both classes accept the exact same fields as `Invoice` — `DebitNote` extends `Invoice` directly, so anything you already know about building an `Invoice` (parties, lines, tax totals, monetary totals) applies unchanged; see [docs/invoice.md](invoice.md) if you haven't built one before. The one addition that matters here is `BillingReference`, which links the Debit Note back to the original invoice.
 
@@ -276,7 +276,7 @@ Identical to the above, except:
 
 - Use `SelfBilledDebitNote` instead of `DebitNote`
 - `InvoiceTypeCode` is `new InvoiceTypeCode('13')` instead of `'03'`
-- You'll typically set `onbehalfof` on the submission call, since a self-billed document is issued by your system on behalf of the supplier's TIN:
+- Submit it under the same credentials as the original self-billed invoice - you, the buyer, are the issuer. **Don't** set `onbehalfof` to the supplier's TIN: that logs in as an intermediary for the supplier and submits the document as them (see the warning in [docs/invoice.md](invoice.md#self-billed-invoice)):
 
 ```php
 use Laraditz\MyInvois\Data\SelfBilledDebitNote;
@@ -304,7 +304,7 @@ $selfBilledDebitNote = new SelfBilledDebitNote(
     LegalMonetaryTotal: $debitNoteLegalMonetaryTotal
 );
 
-$result = MyInvois::document(onbehalfof: 'C25845632020')->submit(
+$result = MyInvois::document()->submit(
     documents: [$selfBilledDebitNote],
     format: Format::XML
 );
